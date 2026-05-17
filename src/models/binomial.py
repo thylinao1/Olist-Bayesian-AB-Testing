@@ -1,4 +1,4 @@
-"""Hierarchical Binomial conversion model — Ch 11 + Ch 13.
+"""Hierarchical Binomial conversion model.
 
 Model
 -----
@@ -9,7 +9,7 @@ Per cell i indexed by (category c, seller_tier s, state g, month m, treatment T)
     logit(p_i) = alpha_C[c] + beta_S[s] + gamma_G[g] + delta_M[m]
                  + tau_C[c] * T_i
 
-Adaptive (hierarchical) priors — partial pooling, McElreath Ch 13.1:
+Adaptive (hierarchical) priors - partial pooling:
 
     alpha_C[c] ~ Normal(alpha_bar, sigma_alpha)
     beta_S[s]  ~ Normal(0,         sigma_beta)
@@ -25,9 +25,9 @@ Hyperpriors:
 Notes
 -----
 * Non-centered parameterisation (z * sigma + mu) is used throughout to avoid
-  the divergences McElreath warns about in §13.4.
+  the divergences that the centered form would produce here.
 * `tau_C[c] ~ Normal(tau_bar, sigma_tau)` lets the treatment effect itself
-  vary by product category — the headline result of the analysis. A flat A/B
+  vary by product category - the headline result of the analysis. A flat A/B
   test gives one number; this gives a posterior over (n_categories) effects
   plus a global mean and across-category variance.
 """
@@ -49,8 +49,8 @@ import pymc as pm
 @dataclass(frozen=True)
 class BinomialModelData:
     """Tensor-shaped inputs to PyMC."""
-    n_trials: np.ndarray          # shape (N,) — denominator
-    n_successes: np.ndarray       # shape (N,) — numerator (success-coded outcome)
+    n_trials: np.ndarray          # shape (N,) - denominator
+    n_successes: np.ndarray       # shape (N,) - numerator (success-coded outcome)
     treatment: np.ndarray         # shape (N,) {0, 1}
     category_idx: np.ndarray      # shape (N,)
     seller_tier_idx: np.ndarray   # shape (N,)
@@ -139,7 +139,7 @@ def build_hierarchical_binomial(d: BinomialModelData) -> pm.Model:
         sigma_delta = pm.Exponential("sigma_delta", 1.0)
         sigma_tau   = pm.Exponential("sigma_tau",   1.0)
 
-        # ---- Group effects, non-centered (Ch 13.4) ----------------------
+        # ---- Group effects, non-centered parameterisation ----------------
         z_alpha = pm.Normal("z_alpha", 0.0, 1.0, dims="category")
         z_beta  = pm.Normal("z_beta",  0.0, 1.0, dims="seller_tier")
         z_gamma = pm.Normal("z_gamma", 0.0, 1.0, dims="state")
@@ -182,7 +182,7 @@ def build_hierarchical_binomial(d: BinomialModelData) -> pm.Model:
 
 
 # ---------------------------------------------------------------------------
-# Prior predictive check helper (Ch 4 + 11 — always do this BEFORE fitting)
+# Prior predictive check helper (always do this BEFORE fitting)
 # ---------------------------------------------------------------------------
 def prior_predictive_check(
     d: BinomialModelData,

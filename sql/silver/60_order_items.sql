@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.order_items — line items joined to product + seller dims
+-- silver.order_items - line items joined to product + seller dims
 -- ----------------------------------------------------------------------------
 -- Plus an item-level revenue split so gold can roll up to order grain quickly.
 -- ============================================================================

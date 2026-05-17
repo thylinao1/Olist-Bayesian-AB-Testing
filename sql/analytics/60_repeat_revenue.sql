@@ -1,5 +1,5 @@
 -- ============================================================================
--- analytics.repeat_revenue — customer-level repeat-purchase revenue panel
+-- analytics.repeat_revenue - customer-level repeat-purchase revenue panel
 -- ----------------------------------------------------------------------------
 -- For each customer, given their *first* order:
 --   * was the first order in the 'treated' bracket (subtotal >= R$ 150
@@ -7,7 +7,7 @@
 --   * within 180 days of the first order, what was the total spend on
 --     subsequent orders? 0 if no repeat purchase happened.
 --
--- This panel feeds the hurdle / zero-inflated revenue model (Ch 12.2).
+-- This panel feeds the hurdle / zero-inflated revenue model.
 -- ============================================================================
 
 CREATE OR REPLACE TABLE analytics.repeat_revenue AS

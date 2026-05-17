@@ -1,7 +1,7 @@
 -- ============================================================================
--- analytics.category_seller_panel — modelling-grade panel for the Bayesian fit
+-- analytics.category_seller_panel - modelling-grade panel for the Bayesian fit
 -- ----------------------------------------------------------------------------
--- The hierarchical Binomial model (Ch 13) operates on a panel grouped by:
+-- The hierarchical Binomial model operates on a panel grouped by:
 --   * product category
 --   * seller volume tier
 --   * purchase week
@@ -53,7 +53,7 @@ SELECT
     -- Conversion rate (the modelling outcome). NULLIF for safety.
     SUM(CAST(is_delivered AS INTEGER))::DOUBLE / NULLIF(COUNT(*), 0)
                                                              AS conversion_rate,
-    -- Placeholder treatment flag — overwritten by feature pipeline.
+    -- Placeholder treatment flag - overwritten by feature pipeline.
     FALSE                                                    AS treatment_assigned
 FROM base
 WHERE category_en IS NOT NULL          -- keep panel tight; missing-category

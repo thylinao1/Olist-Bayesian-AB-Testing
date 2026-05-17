@@ -1,5 +1,5 @@
 -- ============================================================================
--- SILVER LAYER — cleaned, typed, deduplicated tables
+-- SILVER LAYER - cleaned, typed, deduplicated tables
 -- ----------------------------------------------------------------------------
 -- Goals:
 --   1. Fix the typos in source column names (lenght -> length).

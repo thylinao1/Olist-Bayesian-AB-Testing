@@ -146,20 +146,20 @@ def main() -> None:
     )
     lines.append("")
 
-    # On-time delivery — base rate ~89%
+    # On-time delivery - base rate ~89%
     lines.extend(render_section(
-        "On-time delivery — top 5 categories where the policy lifts most",
+        "On-time delivery - top 5 categories where the policy lifts most",
         on_time, ascending=False, n=5, pp_base=0.89,
     ))
 
-    # Stage 1 P(repeat) — base rate ~2.3%
+    # Stage 1 P(repeat) - base rate ~2.3%
     lines.extend(render_section(
-        "P(repeat purchase) — top 5 categories where the policy lifts retention most",
+        "P(repeat purchase) - top 5 categories where the policy lifts retention most",
         repeat, ascending=False, n=5, pp_base=0.023,
     ))
 
-    # Stage 2 conditional spend — log scale, no base-rate conversion
-    lines.append("### Conditional spend if customer returns — top 5 categories\n")
+    # Stage 2 conditional spend - log scale, no base-rate conversion
+    lines.append("### Conditional spend if customer returns - top 5 categories\n")
     sub = spend.sort_values("mean", ascending=False).head(5)
     lines.append("| Rank | Category | δ̅ (log) | × multiplier | 94% HDI | P(δ>0) |")
     lines.append("|---|---|---|---|---|---|")
@@ -172,13 +172,13 @@ def main() -> None:
         )
     lines.append("")
 
-    # Review score — global effect is negative, so show TWO views
+    # Review score - global effect is negative, so show TWO views
     lines.extend(render_section(
-        "Review score — top 5 categories where the policy hurts LEAST",
+        "Review score - top 5 categories where the policy hurts LEAST",
         review, ascending=False, n=5,
     ))
     lines.extend(render_section(
-        "Review score — bottom 5 categories where the policy hurts MOST",
+        "Review score - bottom 5 categories where the policy hurts MOST",
         review, ascending=True, n=5,
     ))
 

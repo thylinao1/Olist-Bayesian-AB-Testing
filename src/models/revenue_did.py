@@ -1,16 +1,16 @@
-"""Difference-in-differences hurdle-LogNormal revenue model — Ch 12.2 + Ch 13.
+"""Difference-in-differences hurdle-LogNormal revenue model.
 
 Same correction the binomial DiD applies, lifted into the two-stage hurdle
 likelihood. Both stages decompose the combined treatment T = eligible AND post
 into three terms:
 
-    Stage 1 (Bernoulli — did the customer come back at all):
+    Stage 1 (Bernoulli - did the customer come back at all):
         logit(theta_i) = alpha_C[c]
                         + beta_e_b * eligible_i
                         + beta_p_b * post_i
                         + delta_b_C[c] * (eligible_i * post_i)   <- policy effect
 
-    Stage 2 (LogNormal — how much they spent if they did):
+    Stage 2 (LogNormal - how much they spent if they did):
         mu_i = beta_C[c]
               + beta_e_l * eligible_i
               + beta_p_l * post_i
@@ -44,8 +44,8 @@ class RevenueDiDData:
     has_repeat: np.ndarray            # (N,) {0,1}
     repeat_revenue: np.ndarray        # (N,) >= 0
     log_first_subtotal: np.ndarray    # (N,)
-    eligible: np.ndarray              # (N,) {0,1} — first_subtotal >= threshold
-    post: np.ndarray                  # (N,) {0,1} — first_order_week >= cutover
+    eligible: np.ndarray              # (N,) {0,1} - first_subtotal >= threshold
+    post: np.ndarray                  # (N,) {0,1} - first_order_week >= cutover
     category_idx: np.ndarray          # (N,)
     n_categories: int
     category_labels: Sequence[str] = field(default_factory=tuple)

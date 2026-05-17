@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.products — typo fixes + English category names + size proxies
+-- silver.products - typo fixes + English category names + size proxies
 -- ----------------------------------------------------------------------------
 -- Olist source has Portuguese-only category labels and three columns named
 -- with the misspelling 'lenght'. We rename and translate up-front.
@@ -29,7 +29,7 @@ SELECT
         THEN NULL
         ELSE p.product_length_cm * p.product_height_cm * p.product_width_cm
     END                                              AS volume_cm3,
-    -- Data-quality flag — model can filter on this
+    -- Data-quality flag - model can filter on this
     (p.product_category_name IS NULL
      OR p.product_weight_g IS NULL
      OR p.product_length_cm IS NULL)                 AS has_missing_attributes

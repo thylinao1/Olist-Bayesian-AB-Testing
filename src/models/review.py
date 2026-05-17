@@ -1,4 +1,4 @@
-"""Hierarchical ordered-logit review-score model — Ch 12.3.
+"""Hierarchical ordered-logit review-score model.
 
 Construction
 ------------
@@ -6,13 +6,13 @@ Olist customers leave a review score of 1-5 (integer, ordered). Treating
 this as continuous would imply the gap between 1 and 2 stars is the same
 as 4 and 5 stars, which is false in nearly every Likert-style instrument.
 
-Following McElreath §12.3, we use a *cumulative-link* (ordered-logit) model.
+We use the standard *cumulative-link* (ordered-logit) model.
 For K=5 outcome levels we need K-1=4 cutpoints kappa_k on the logit scale,
 and a linear predictor phi_i that shifts the latent distribution.
 
     review_score_i ~ OrderedLogit(eta = phi_i, cutpoints = kappa)
 
-with linear predictor (treatment + adjustment-set covariates as in Ch 13):
+with linear predictor (treatment + adjustment-set covariates):
 
     phi_i = beta_C[c] + tau_C[c] * T_i + gamma_S[s] + delta_M[m]
 

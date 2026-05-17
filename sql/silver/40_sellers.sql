@@ -1,8 +1,8 @@
 -- ============================================================================
--- silver.sellers — sellers joined to silver.geolocation for lat/lng
+-- silver.sellers - sellers joined to silver.geolocation for lat/lng
 -- ----------------------------------------------------------------------------
 -- Joining sellers to the deduped geolocation centroid lets us model regional
--- effects (Ch 13 varying intercepts by state, Ch 14 Gaussian-process geo).
+-- effects (varying intercepts by state; optional Gaussian-process geo).
 -- ============================================================================
 
 CREATE OR REPLACE TABLE silver.sellers AS

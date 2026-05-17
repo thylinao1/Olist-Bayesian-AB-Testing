@@ -4,7 +4,7 @@ This module is the single point where:
 
     1. The hypothetical free-shipping treatment is defined operationally.
     2. The DAG-justified adjustment set is encoded as integer category codes
-       suitable for PyMC index variables (Ch 13 multilevel grouping).
+       suitable for PyMC index variables in the multilevel grouping.
     3. The panel is filtered to a reasonable analysis window so we do not
        model orders that had insufficient time to be fulfilled.
 
@@ -26,7 +26,7 @@ from .paths import DUCKDB_PATH
 
 
 # ---------------------------------------------------------------------------
-# Treatment definition — see docs/01_treatment_and_dag.md
+# Treatment definition - see docs/01_treatment_and_dag.md
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
 class TreatmentSpec:
@@ -114,7 +114,7 @@ def build_modelling_frame(
         df = df.dropna(subset=["category_en"])
     df = df.dropna(subset=["seller_volume_tier", "customer_state"]).copy()
 
-    # Cutover week — median purchase week so treated/control are balanced.
+    # Cutover week - median purchase week so treated/control are balanced.
     if spec.cutover_week is None:
         cutover_week = pd.to_datetime(df["purchase_week"].median())
         spec = TreatmentSpec(
@@ -142,16 +142,16 @@ def build_modelling_frame(
 def panel_for_binomial(df: pd.DataFrame) -> pd.DataFrame:
     """Aggregate to (category, seller_tier, state, month, treatment) cells.
 
-    The hierarchical Binomial model in Ch 11.1 uses an aggregated form:
+    The hierarchical Binomial model uses an aggregated form:
     one row per cell, with `n_trials` and `n_successes` columns. This is
     statistically identical to per-row Bernoulli but ~100x faster to sample.
 
     Two outcome columns are produced so the modelling code can pick the one
     with usable variance:
 
-        n_delivered  — `is_delivered` (cancelled vs reached customer)
+        n_delivered  - `is_delivered` (cancelled vs reached customer)
                        Saturated at ~97% on Olist; included for completeness.
-        n_on_time    — `is_on_time`   (delivered by estimated date)
+        n_on_time    - `is_on_time`   (delivered by estimated date)
                        Base rate ~89%; this is the outcome we actually fit.
     """
     grouped = (
@@ -182,7 +182,7 @@ def panel_for_did(df: pd.DataFrame, spec: TreatmentSpec) -> pd.DataFrame:
     main effect AND the interaction (the policy effect).
 
     The DiD design avoids the basket-size confound flagged in
-    `reports/final_report.md` §4.1: the naive `treatment = eligible AND post`
+    `reports/final_report.md`: the naive `treatment = eligible AND post`
     indicator conflates the policy with the structural basket-size slowness
     AND with any common marketplace-wide time trend. Splitting them lets
     the model attribute each gap to its own term.

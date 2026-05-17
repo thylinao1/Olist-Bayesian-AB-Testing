@@ -1,5 +1,5 @@
 -- ============================================================================
--- analytics.order_funnel — order lifecycle funnel by cohort
+-- analytics.order_funnel - order lifecycle funnel by cohort
 -- ----------------------------------------------------------------------------
 -- Olist orders move through a status pipeline:
 --   created -> approved -> in_carrier -> delivered  (or canceled / unavailable)
@@ -9,7 +9,7 @@
 -- fraction made it to each stage?
 --
 -- Why this matters for the project:
---   * The hierarchical Binomial model (Ch 11 + 13) needs a clean conversion
+--   * The hierarchical Binomial model needs a clean conversion
 --     definition. This file defines it.
 --   * The CV bullet "built funnel analysis with window functions" is real
 --     work, not a buzzword.

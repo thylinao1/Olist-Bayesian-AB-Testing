@@ -1,5 +1,5 @@
 -- ============================================================================
--- gold.dim_customer — one row per real customer, with lifetime aggregates
+-- gold.dim_customer - one row per real customer, with lifetime aggregates
 -- ----------------------------------------------------------------------------
 -- Lifetime aggregates are computed from gold.fact_orders so we get all the
 -- payment and item rollups for free. Tier banding is intentionally
@@ -33,7 +33,7 @@ WITH lifetime AS (
 banded AS (
     SELECT
         l.*,
-        -- Quartile spend tier — ordinal 1..4, lowest -> highest spender.
+        -- Quartile spend tier - ordinal 1..4, lowest -> highest spender.
         NTILE(4) OVER (ORDER BY lifetime_revenue) AS spend_quartile
     FROM lifetime AS l
 )

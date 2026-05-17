@@ -9,7 +9,7 @@ env/
 *.egg-info/
 .ipynb_checkpoints/
 
-# Data — keep schema and docs, not the raw files
+# Data - keep schema and docs, not the raw files
 data/raw/*
 !data/raw/.gitkeep
 data/duckdb/*
@@ -17,7 +17,7 @@ data/duckdb/*
 *.duckdb
 *.duckdb.wal
 
-# Personal documents at the project root (CV + internships brief) —
+# Personal documents at the project root (CV + internships brief) -
 # these were dropped here for context and must NOT go on GitHub.
 /*.docx
 /*.pdf

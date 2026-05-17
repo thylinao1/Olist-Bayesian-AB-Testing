@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.order_payments — kept at instalment grain (one row per installment)
+-- silver.order_payments - kept at instalment grain (one row per installment)
 -- ----------------------------------------------------------------------------
 -- Most analyses want the order-level total. We keep instalment grain in silver
 -- because the *number* and *type* of instalments is itself an interesting

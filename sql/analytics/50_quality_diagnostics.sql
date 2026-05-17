@@ -1,5 +1,5 @@
 -- ============================================================================
--- analytics.quality_diagnostics — single-table audit of pipeline integrity
+-- analytics.quality_diagnostics - single-table audit of pipeline integrity
 -- ----------------------------------------------------------------------------
 -- Returns one row per check with a pass/fail flag. Anything other than
 -- (status='ok') means the model upstream of it shouldn't be trusted. Run

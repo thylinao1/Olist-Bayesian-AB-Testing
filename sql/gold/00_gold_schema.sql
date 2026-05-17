@@ -1,5 +1,5 @@
 -- ============================================================================
--- GOLD LAYER — analytics-ready facts and dimensions
+-- GOLD LAYER - analytics-ready facts and dimensions
 -- ----------------------------------------------------------------------------
 -- The gold layer is the contract between the SQL pipeline and everything
 -- downstream (notebooks, models, dashboards). One grain per table, all the

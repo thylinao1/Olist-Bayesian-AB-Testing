@@ -1,4 +1,4 @@
-"""Hurdle / zero-inflated repeat-revenue model — Ch 12.2.
+"""Hurdle / zero-inflated repeat-revenue model.
 
 Construction
 ------------
@@ -8,7 +8,7 @@ the customer's first order. Two processes generate the data:
     1.  Did the customer come back at all?  (Bernoulli)
     2.  If they did, how much did they spend?  (LogNormal on repeat revenue)
 
-This is the natural McElreath §12.2 mixture: most customer rows are exact
+This is the natural hurdle-style mixture: most customer rows are exact
 zeros (no repeat purchase) and the rest have positive continuous spend.
 
 Likelihood
@@ -21,8 +21,8 @@ equivalent to a hurdle distribution:
     p(y_i = 0)        = 1 - theta_i
     p(y_i = y | y>0)  = theta_i * LogNormalPDF(y | mu_i, sigma)
 
-Linear models — hierarchical priors over the first-order product category
-(Ch 13). The treatment indicator T enters BOTH stages because the policy
+Linear models - hierarchical priors over the first-order product category
+. The treatment indicator T enters BOTH stages because the policy
 plausibly affects both 'do they return' and 'how much do they spend'.
 
     logit(theta_i) = alpha_C[c]  + tau_C[c] * T_i
@@ -83,7 +83,7 @@ def load_repeat_revenue(
         & (df["first_subtotal"] >= subtotal_threshold_brl)
     ).astype(int)
 
-    # Drop categories with very few customers — partial pooling would still
+    # Drop categories with very few customers - partial pooling would still
     # work but the report becomes hard to read. Threshold is generous.
     cat_counts = df["first_category"].value_counts()
     keep = cat_counts[cat_counts >= 50].index
@@ -109,7 +109,7 @@ def build_model_data(df: pd.DataFrame) -> RevenueModelData:
     `n_repeat_orders > 0` but `repeat_revenue = 0` (cancelled or
     fully-refunded repeat orders). LogNormal log-prob at y=0 is -inf,
     which crashes NUTS at initialisation. We treat these as
-    non-repeats — they were not economic repeats anyway.
+    non-repeats - they were not economic repeats anyway.
     """
     df = df.copy()
     df["has_repeat"] = (
@@ -141,7 +141,7 @@ def build_hurdle_lognormal(d: RevenueModelData) -> pm.Model:
                      else np.arange(d.n_categories),
     }
 
-    # The repeat-only mask — used to slice the LogNormal observation set
+    # The repeat-only mask - used to slice the LogNormal observation set
     pos_idx = np.flatnonzero(d.has_repeat == 1)
 
     with pm.Model(coords=coords) as model:

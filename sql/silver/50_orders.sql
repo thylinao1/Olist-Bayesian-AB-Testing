@@ -1,11 +1,11 @@
 -- ============================================================================
--- silver.orders — orders enriched with customer/shipping + delivery metrics
+-- silver.orders - orders enriched with customer/shipping + delivery metrics
 -- ----------------------------------------------------------------------------
 -- The interesting derived fields here:
---   * delivery_days        — purchase -> delivery customer
---   * approval_lag_minutes — purchase -> payment approved
---   * delivery_vs_estimate — actual delivery - estimate (negative => early)
---   * is_delivered_on_time — bool
+--   * delivery_days        - purchase -> delivery customer
+--   * approval_lag_minutes - purchase -> payment approved
+--   * delivery_vs_estimate - actual delivery - estimate (negative => early)
+--   * is_delivered_on_time - bool
 --
 -- We also surface customer_unique_id directly on orders so downstream joins
 -- against silver.customers don't need to bounce through customer_orders.
