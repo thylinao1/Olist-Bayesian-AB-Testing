@@ -9,10 +9,10 @@
 -- fraction made it to each stage?
 --
 -- Why this matters for the project:
---   * The hierarchical Binomial model needs a clean conversion
---     definition. This file defines it.
---   * The CV bullet "built funnel analysis with window functions" is real
---     work, not a buzzword.
+--   * The hierarchical Binomial model needs a clean conversion definition;
+--     this file produces it at weekly cohort grain.
+--   * The funnel diagnostics also feed quality_diagnostics: any stage with
+--     a zero conversion rate flags a data-load regression upstream.
 -- ============================================================================
 
 CREATE OR REPLACE TABLE analytics.order_funnel AS

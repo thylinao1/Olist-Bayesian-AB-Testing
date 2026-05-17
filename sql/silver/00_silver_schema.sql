@@ -8,7 +8,7 @@
 --      one-row-per-person customer dimension keyed on customer_unique_id.
 --   3. Dedupe geolocation to one (lat, lng) centroid per zip prefix.
 --   4. Translate product categories to English up-front so downstream reports
---      are recruiter-readable.
+--      and forest-plot axis labels are readable without a lookup table.
 --   5. Add data-quality flags so downstream models can opt out of broken rows.
 -- ============================================================================
 
