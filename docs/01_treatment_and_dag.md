@@ -2,7 +2,7 @@
 
 This document does two jobs that must precede any model fit:
 
-1. **Defines the "treatment" we're going to estimate the effect of.** Olist is observational data; there is no real RCT in it. To stay honest we frame the analysis as *the inferential machinery that would be used if Olist ran this experiment*. The treatment is synthetic but the exposure variable is constructed from variables that are actually present in the data, and the modelling pipeline is the one we would deploy if the assignment were real. Recruiters reading this should see: "this person knows the difference between observational and experimental data and treats causal claims with appropriate humility."
+1. **Defines the "treatment" we're going to estimate the effect of.** Olist is observational data; there is no real RCT in it. The analysis is framed as *the inferential machinery that would be used if Olist ran this experiment* — the treatment is synthetic, but the exposure variable is built from columns that already exist in the data, and the modelling pipeline is the one that would be deployed if the assignment were real. Causal claims are reported with the humility appropriate to observational data plus a synthetic intervention.
 2. **Encodes the causal assumptions as a DAG**, identifies the backdoor paths, and resolves the minimal adjustment set using the standard four-elemental-confounds framework (the fork, the pipe, the collider, the descendant).
 
 ---
@@ -171,7 +171,7 @@ Both channels would inflate the apparent policy effect relative to the true caus
 
 **The cleanest fix for a real deployment is a clustered RCT.** Randomise at the *seller* level, not the order level: a randomly chosen subset of sellers participate in the free-shipping policy and the rest do not. This breaks both interference channels because (a) participating sellers cannot raise prices on customers visible to non-participating sellers without losing them, and (b) logistics prioritisation only crowds out other orders within the same seller, not across the marketplace. The cost is statistical power — clustered designs have effectively smaller sample sizes — and the design must be powered accordingly.
 
-For this portfolio analysis, the headline numbers should be read as *upper-bound estimates* of the policy effect under SUTVA-violating channels that the data cannot rule out.
+The headline numbers in this analysis should therefore be read as *upper-bound estimates* of the true policy effect under SUTVA-violating channels that the static data cannot rule out.
 
 ---
 
