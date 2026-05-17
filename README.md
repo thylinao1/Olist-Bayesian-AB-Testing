@@ -1,10 +1,10 @@
 # Hierarchical Bayesian A/B Testing on a Marketplace
 
-A DuckDB SQL feature pipeline and a hierarchical Bayesian inference stack (PyMC) applied to the public **Olist Brazilian E-commerce** dataset — ≈100k orders across 9 relational tables.
+A DuckDB SQL feature pipeline and a hierarchical Bayesian inference stack (PyMC) applied to the public **Olist Brazilian E-commerce** dataset - ≈100k orders across 9 relational tables.
 
 > The Bayesian methods used here are inspired by Richard McElreath's book and accompanying YouTube course.
 
-The headline question — *"would a hypothetical free-shipping-above-R\$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer reviews, and does the answer depend on which product category we ask about?"* — is answered with three hierarchical Bayesian models running on the same DAG-justified adjustment set. Classical A/B-test baselines (two-proportion z, Welch t, Mann-Whitney U, chi-square) are run side-by-side, so the gap between flat and hierarchical analyses is visible in the same place as each headline number.
+The headline question - *"would a hypothetical free-shipping-above-R\$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer reviews, and does the answer depend on which product category we ask about?"* - is answered with three hierarchical Bayesian models running on the same DAG-justified adjustment set. Classical A/B-test baselines (two-proportion z, Welch t, Mann-Whitney U, chi-square) are run side-by-side, so the gap between flat and hierarchical analyses is visible in the same place as each headline number.
 
 > The full methodology and results write-up is in [`reports/final_report.md`](reports/final_report.md).
 
@@ -14,7 +14,7 @@ The headline question — *"would a hypothetical free-shipping-above-R\$ 150 pol
 
 The SQL layer is structured as a medallion pipeline (bronze → silver → gold → analytics) on DuckDB: multi-table joins, CTEs, window functions for cohort matrices and per-customer order ranking, gap-and-island session reconstruction, and an automated quality-diagnostics table.
 
-The causal layer encodes the hypothetical treatment in code, draws the DAG programmatically with NetworkX (`src/dag.py`), and derives the adjustment set three ways (by hand, by the four-elemental-confounds recipe, and computationally) — all three agree. Conditional independencies are tested as falsification checks.
+The causal layer encodes the hypothetical treatment in code, draws the DAG programmatically with NetworkX (`src/dag.py`), and derives the adjustment set three ways (by hand, by the four-elemental-confounds recipe, and computationally) - all three agree. Conditional independencies are tested as falsification checks.
 
 The Bayesian layer fits three hierarchical models (Binomial conversion, hurdle-LogNormal revenue, ordered-logit review). All three use non-centered priors and carry varying treatment slopes by product category, so the treatment effect itself is a posterior distribution per category rather than a single number.
 
@@ -28,7 +28,7 @@ DuckDB (storage + SQL engine, full window-function support) · Python 3.11 · Py
 
 **On scalability.** NUTS MCMC at this scale (97k orders × ~120 free parameters, ~5 min per fit on 4 cores with `nutpie`) gives full posterior uncertainty, but would not support daily refreshes at Shopee- or TikTok-Shop-style data volumes. The realistic production alternatives are: (1) variational inference (`pm.fit(method="advi")`), which trades some posterior-tail fidelity for ~100× speedup; (2) Laplace approximation around the posterior mode, sufficient when the likelihood is well-behaved; (3) a frequentist DiD-logistic, which runs in milliseconds and (as the cross-method triangulation in §4.1 of the report shows) returns essentially the same point estimate as the Bayesian fit. Full MCMC is used here because the analysis is about credible intervals over latent decomposition channels, not real-time scoring.
 
-**On the geolocation data.** Olist ships a 1M-row geolocation table (one row per zip-prefix × lat/lng observation). The silver layer deduplicates it to one centroid per zip prefix, then the seller dimension joins on `seller_zip_code_prefix` to attach lat/lng to each seller. Customer state and seller state are used as adjustment-set variables in the models (per the DAG). The raw lat/lng coordinates themselves are not used in the current models — a natural extension would be a distance-to-seller covariate as a delivery-time confound, or a Gaussian-process state-level effect, but neither was needed for the headline analysis.
+**On the geolocation data.** Olist ships a 1M-row geolocation table (one row per zip-prefix × lat/lng observation). The silver layer deduplicates it to one centroid per zip prefix, then the seller dimension joins on `seller_zip_code_prefix` to attach lat/lng to each seller. Customer state and seller state are used as adjustment-set variables in the models (per the DAG). The raw lat/lng coordinates themselves are not used in the current models - a natural extension would be a distance-to-seller covariate as a delivery-time confound, or a Gaussian-process state-level effect, but neither was needed for the headline analysis.
 
 ---
 
@@ -118,4 +118,4 @@ pytest tests/ -v
 
 ## License
 
-Code: MIT. Data: Olist Brazilian E-commerce Public Dataset © Olist Store, released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) — non-commercial use only.
+Code: MIT. Data: Olist Brazilian E-commerce Public Dataset © Olist Store, released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) - non-commercial use only.

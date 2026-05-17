@@ -139,7 +139,7 @@ def main() -> None:
     lines.append("")
     lines.append("## Substantive takeaway")
     lines.append("")
-    lines.append("The DiD model's advantage is *causal identification* — it cleanly "
+    lines.append("The DiD model's advantage is *causal identification* - it cleanly "
                  "separates the policy effect from basket-size structural effects and "
                  "the marketplace-wide time trend (as documented in §4.1 and §6 of the "
                  "main report). Out-of-sample predictive accuracy is a separate question, "

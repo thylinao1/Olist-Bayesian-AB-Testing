@@ -221,7 +221,7 @@ def _build_writeup(results: list[dict]) -> str:
         f"{spread:+.4f} logit (~{spread*100*0.11:.2f} pp on the "
         f"probability scale at the ~89% baseline). The headline "
         f"+1.5 pp on-time policy effect is robust to the hyperprior "
-        f"choice — the posterior is dominated by the 97k-order "
+        f"choice - the posterior is dominated by the 97k-order "
         f"likelihood, not by the prior."
     )
     lines.append("")

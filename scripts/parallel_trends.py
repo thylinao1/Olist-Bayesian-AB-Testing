@@ -5,12 +5,12 @@ under the assumption that the pre-cutover on-time delivery trends are
 parallel between the eligible (subtotal >= R$ 150) and ineligible cohorts.
 This script makes that assumption testable, two ways:
 
-1.  **Visual check** — plot weekly on-time rates for both cohorts across
+1.  **Visual check** - plot weekly on-time rates for both cohorts across
     the full panel, with a vertical line at the cutover week. If the two
     lines move roughly in parallel before the cutover, the assumption
     holds visually.
 
-2.  **Formal pre-trend regression** — restrict to the pre-cutover window
+2.  **Formal pre-trend regression** - restrict to the pre-cutover window
     and fit:
 
         logit(on_time) = a + b*time + c*eligible + d*(time x eligible)
