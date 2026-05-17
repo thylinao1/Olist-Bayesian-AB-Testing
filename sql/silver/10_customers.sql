@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.customers — one row per real customer
+-- silver.customers - one row per real customer
 -- ----------------------------------------------------------------------------
 -- Bronze schema gotcha: `customer_id` is a per-order shipping-address proxy,
 -- *not* a stable user identifier. The same person placing two orders gets two

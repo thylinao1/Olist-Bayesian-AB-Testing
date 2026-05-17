@@ -1,11 +1,11 @@
-"""Classical A/B-test baselines — the comparison set for the Bayesian models.
+"""Classical A/B-test baselines - the comparison set for the Bayesian models.
 
 The point of this module is to make it easy to say:
 
     "On the marginal data, the two-proportion z-test gives p=0.04 and the
      Welch t-test gives p=0.31. The hierarchical Bayesian model finds
      posterior mass on a positive treatment effect for 14 of 73 categories
-     even though the pooled comparison is null — Simpson's-paradox-style
+     even though the pooled comparison is null - Simpson's-paradox-style
      heterogeneity invisible to flat A/B analysis."
 
 That is the headline result of the project. The classical baselines are
@@ -14,9 +14,9 @@ use by default, and the Bayesian story has to land *next to* them.
 
 References
 ----------
-- McElreath §7.4-7.5 on WAIC / PSIS-LOO for Bayesian model comparison.
+- WAIC / PSIS-LOO for Bayesian model comparison (Vehtari et al.).
 - Two-proportion z, Welch's t, Mann-Whitney U: standard introductory
-  statistics — included here to demonstrate they are not the right tool
+  statistics - included here to demonstrate they are not the right tool
   for hierarchical data.
 """
 
@@ -71,7 +71,7 @@ def two_proportion_z(
 
 
 # ---------------------------------------------------------------------------
-# Welch's t-test (revenue) — unequal variance, the "default" continuous test
+# Welch's t-test (revenue) - unequal variance, the "default" continuous test
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
 class WelchTResult:
@@ -111,7 +111,7 @@ def welch_t_test(treated: np.ndarray, control: np.ndarray,
 
 
 # ---------------------------------------------------------------------------
-# Mann-Whitney U — non-parametric alternative for revenue / scores
+# Mann-Whitney U - non-parametric alternative for revenue / scores
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True)
 class MannWhitneyResult:

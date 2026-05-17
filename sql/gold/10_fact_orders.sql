@@ -1,5 +1,5 @@
 -- ============================================================================
--- gold.fact_orders — one row per order, denormalised, with derived signals
+-- gold.fact_orders - one row per order, denormalised, with derived signals
 -- ----------------------------------------------------------------------------
 -- This is THE table the Bayesian models read. It bundles together:
 --
@@ -85,7 +85,7 @@ SELECT
         ORDER BY order_purchase_timestamp ASC
     )                                            AS customer_order_rank,
 
-    -- Total orders this customer ever places — useful as a fixed feature.
+    -- Total orders this customer ever places - useful as a fixed feature.
     COUNT(*) OVER (
         PARTITION BY customer_unique_id
     )                                            AS customer_total_orders,

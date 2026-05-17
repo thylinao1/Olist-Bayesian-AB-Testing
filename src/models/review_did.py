@@ -1,4 +1,4 @@
-"""Difference-in-differences ordered-logit review model — Ch 12.3 + Ch 13.
+"""Difference-in-differences ordered-logit review model.
 
 Same DiD correction the binomial and revenue models apply. Replaces the
 combined treatment indicator with `eligible`, `post`, and `eligible * post`

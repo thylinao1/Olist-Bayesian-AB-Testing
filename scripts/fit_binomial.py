@@ -6,8 +6,8 @@ Usage:
     python scripts/fit_binomial.py --use-nutpie             # 3-5x faster sampler
 
 Output:
-    reports/figures/binomial_*.png        — posterior plots
-    data/duckdb/binomial_idata.nc         — full ArviZ InferenceData (NetCDF)
+    reports/figures/binomial_*.png        - posterior plots
+    data/duckdb/binomial_idata.nc         - full ArviZ InferenceData (NetCDF)
 """
 
 from __future__ import annotations

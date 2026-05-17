@@ -137,13 +137,13 @@ def run(args: argparse.Namespace) -> None:
 
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
     az.plot_forest(idata, var_names=["delta_b_C"], combined=True, hdi_prob=0.94)
-    plt.title("Per-category POLICY effect on P(repeat) — Stage 1 (DiD)")
+    plt.title("Per-category POLICY effect on P(repeat) - Stage 1 (DiD)")
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / "revenue_did_delta_b_C_forest.png", dpi=150)
     plt.close()
 
     az.plot_forest(idata, var_names=["delta_l_C"], combined=True, hdi_prob=0.94)
-    plt.title("Per-category POLICY effect on log(spend|repeat) — Stage 2 (DiD)")
+    plt.title("Per-category POLICY effect on log(spend|repeat) - Stage 2 (DiD)")
     plt.tight_layout()
     plt.savefig(FIGURES_DIR / "revenue_did_delta_l_C_forest.png", dpi=150)
     plt.close()

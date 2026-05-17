@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.geolocation — one centroid per zip prefix
+-- silver.geolocation - one centroid per zip prefix
 -- ----------------------------------------------------------------------------
 -- Bronze geolocation has 1M+ rows: many (lat, lng) pairs per zip prefix
 -- because each order's geocoded address is recorded individually. For

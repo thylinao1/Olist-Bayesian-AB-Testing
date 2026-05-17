@@ -45,7 +45,7 @@ EDGES: list[tuple[str, str]] = [
     ("T", "B"),     # treatment incentivises larger baskets
     ("B", "D"),     # bigger baskets take longer to ship
     ("D", "Y"),
-    # Collider — caused by both T (review prompts vary by treatment) and Y
+    # Collider - caused by both T (review prompts vary by treatment) and Y
     ("T", "R"),
     ("Y", "R"),
 ]
@@ -69,7 +69,7 @@ def build_graph() -> nx.DiGraph:
 def adjustment_set(g: nx.DiGraph) -> set[str]:
     """The minimal adjustment set under our assumptions.
 
-    Per Ch 6: condition on every fork-style confounder of (T, Y). Do NOT
+    Standard backdoor recipe: condition on every fork-style confounder of (T, Y). Do NOT
     condition on mediators or colliders. We compute it explicitly rather
     than calling networkx's algorithm so the logic is auditable.
     """
@@ -96,7 +96,7 @@ def implied_independencies(g: nx.DiGraph) -> list[tuple[str, str, frozenset[str]
     for a, b in product(nodes, nodes):
         if a >= b or b in nx.descendants(g, a) or a in nx.descendants(g, b):
             continue
-        # Try conditioning on the parents of both — a sufficient set.
+        # Try conditioning on the parents of both - a sufficient set.
         cond = frozenset(set(g.predecessors(a)) | set(g.predecessors(b))) - {a, b}
         # NetworkX renamed d_separated -> is_d_separator in v3.3+. Try both
         # so the script keeps working under either version.
@@ -178,17 +178,17 @@ def render(g: nx.DiGraph, out_path: Path) -> None:
                    label="outcome (Y)"),
         plt.Line2D([], [], marker="o", linestyle="", markersize=10,
                    markerfacecolor="#a9d18e", markeredgecolor="black",
-                   label="confounder — adjust"),
+                   label="confounder - adjust"),
         plt.Line2D([], [], marker="o", linestyle="", markersize=10,
                    markerfacecolor="#f4b183", markeredgecolor="black",
-                   label="mediator — do NOT adjust"),
+                   label="mediator - do NOT adjust"),
         plt.Line2D([], [], marker="o", linestyle="", markersize=10,
                    markerfacecolor="#bfbfbf", markeredgecolor="black",
-                   label="collider — do NOT adjust"),
+                   label="collider - do NOT adjust"),
     ]
     ax.legend(handles=legend_handles, loc="lower left", fontsize=8, frameon=False)
 
-    ax.set_title("Causal DAG — Olist free-shipping treatment", fontsize=13)
+    ax.set_title("Causal DAG - Olist free-shipping treatment", fontsize=13)
     ax.axis("off")
     fig.tight_layout()
     out_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,5 +1,5 @@
 -- ============================================================================
--- analytics.cohort_retention — monthly customer retention matrix
+-- analytics.cohort_retention - monthly customer retention matrix
 -- ----------------------------------------------------------------------------
 -- Builds the classic cohort heatmap: rows = signup month, columns = months
 -- since signup, cell value = pct of cohort that ordered that month.

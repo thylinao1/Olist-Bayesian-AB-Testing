@@ -53,7 +53,7 @@ def main() -> None:
     out_lines.append("")
 
     # ---- 1.  ON-TIME DELIVERY (binomial / two-proportion z) -----------
-    print(_section("Two-proportion z — on-time delivery"))
+    print(_section("Two-proportion z - on-time delivery"))
     out_lines.append("## Two-proportion z-test on on-time delivery\n")
 
     treated = df[df["treatment"] == 1]
@@ -71,7 +71,7 @@ def main() -> None:
     out_lines.append("```\n" + line + "\n```\n")
 
     # ---- 2.  REVENUE (Welch t-test on customer-level repeat revenue) -----
-    print(_section("Welch t-test — customer-level repeat revenue (180 days)"))
+    print(_section("Welch t-test - customer-level repeat revenue (180 days)"))
     out_lines.append("## Welch t-test on per-customer repeat revenue (180-day window)\n")
 
     rev = load_repeat_revenue(cutover_week=spec.cutover_week)
@@ -87,7 +87,7 @@ def main() -> None:
     out_lines.append("```\n" + line + "\n```\n")
 
     # ---- 3.  REVENUE (Mann-Whitney as a non-parametric stress test) ------
-    print(_section("Mann-Whitney U — same outcome, non-parametric"))
+    print(_section("Mann-Whitney U - same outcome, non-parametric"))
     out_lines.append("## Mann-Whitney U on per-customer repeat revenue\n")
     mw = mann_whitney(rev[rev["treatment"] == 1]["repeat_revenue"].to_numpy(),
                       rev[rev["treatment"] == 0]["repeat_revenue"].to_numpy())
@@ -99,7 +99,7 @@ def main() -> None:
     out_lines.append("```\n" + line + "\n```\n")
 
     # ---- 4.  REVIEW SCORE (chi-square + Mann-Whitney) --------------------
-    print(_section("Chi-square — review score distribution by treatment"))
+    print(_section("Chi-square - review score distribution by treatment"))
     out_lines.append("## Chi-square test of independence: review score x treatment\n")
     rev_df = load_review_panel(cutover_week=spec.cutover_week)
     chi = chi_square_review(rev_df)
@@ -112,7 +112,7 @@ def main() -> None:
     out_lines.append(f"p-value: {chi.p_value:.4f}")
     out_lines.append("```\n")
 
-    # Mann-Whitney on review score (treats the ordinal as ranks — defensible)
+    # Mann-Whitney on review score (treats the ordinal as ranks - defensible)
     mw_rev = mann_whitney(
         rev_df[rev_df["treatment"] == 1]["review_score"].to_numpy(),
         rev_df[rev_df["treatment"] == 0]["review_score"].to_numpy(),

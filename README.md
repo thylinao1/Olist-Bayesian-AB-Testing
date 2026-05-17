@@ -2,7 +2,9 @@
 
 A portfolio project that combines a **production-style DuckDB SQL feature pipeline** with **hierarchical Bayesian inference (PyMC)**, applied to the public **Olist Brazilian E-commerce** dataset (≈100k orders across 9 relational tables).
 
-The headline question — *"would a hypothetical free-shipping-above-R\$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer reviews — and does the answer depend on which product category we ask about?"* — is answered with three Bayesian models that span four chapters of *Statistical Rethinking* (McElreath, 2nd ed.) and run on the same DAG-justified adjustment set. Classical A/B-test baselines (two-proportion z, Welch t, Mann-Whitney U, chi-square) are run side-by-side so the gap between flat and hierarchical analysis is the storytelling hook.
+> The Bayesian methods used here are inspired by Richard McElreath's book and accompanying YouTube course.
+
+The headline question - *"would a hypothetical free-shipping-above-R\$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer reviews - and does the answer depend on which product category we ask about?"* - is answered with three hierarchical Bayesian models running on the same DAG-justified adjustment set. Classical A/B-test baselines (two-proportion z, Welch t, Mann-Whitney U, chi-square) are run side-by-side so the gap between flat and hierarchical analysis is the storytelling hook.
 
 > The full methodology and results write-up is in [`reports/final_report.md`](reports/final_report.md).
 
@@ -12,11 +14,11 @@ The headline question — *"would a hypothetical free-shipping-above-R\$ 150 pol
 
 **SQL at the level marketplace teams actually use it.**  Multi-table joins, CTEs across bronze → silver → gold → analytics layers, window functions for cohort matrices and per-customer order ranking, gap-and-island session reconstruction, automated quality-diagnostics table. Not `SELECT … WHERE … GROUP BY`.
 
-**Causal-inference rigour, not just regression.**  The hypothetical treatment is encoded in code, the DAG is drawn programmatically with NetworkX (`src/dag.py`) and the adjustment set is derived three ways (by hand, by the four-elemental-confounds recipe in §6.4, and computationally) — they all agree. Conditional independencies are tested as falsification checks per §6.4.3.
+**Causal-inference rigour, not just regression.**  The hypothetical treatment is encoded in code, the DAG is drawn programmatically with NetworkX (`src/dag.py`) and the adjustment set is derived three ways (by hand, by the four-elemental-confounds recipe, and computationally) - they all agree. Conditional independencies are tested as falsification checks.
 
-**Hierarchical Bayesian modelling, not toy.**  Three models (Binomial conversion, hurdle-LogNormal revenue, ordered-logit review) all use **non-centered priors** for stability per §13.4, and use **varying treatment slopes by category** (the chapter-13 generalization of §13.1's tadpoles) so the treatment effect itself is a posterior distribution per category — not a single number.
+**Hierarchical Bayesian modelling, not toy.**  Three models (Binomial conversion, hurdle-LogNormal revenue, ordered-logit review) all use **non-centered priors** for stability, and use **varying treatment slopes by category** (a partial-pooling generalisation of a varying-intercepts setup) so the treatment effect itself is a posterior distribution per category - not a single number.
 
-**Comparison to the methods a hiring team would default to.**  Two-proportion z, Welch t, Mann-Whitney, chi-square — run on the same data slices. The Bayesian story is told *next to* them, not instead of.
+**Comparison to the methods a hiring team would default to.**  Two-proportion z, Welch t, Mann-Whitney, chi-square - run on the same data slices. The Bayesian story is told *next to* them, not instead of.
 
 ---
 
@@ -57,7 +59,7 @@ git clone <repo>; cd "Bayesian Project"
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 1.  Acquire the Olist data — see data/README.md
+# 1.  Acquire the Olist data - see data/README.md
 kaggle datasets download -d olistbr/brazilian-ecommerce --unzip -p data/raw/
 
 # 2.  Build the warehouse: bronze → silver → gold → analytics  (~5s)
@@ -66,7 +68,7 @@ python -m src.etl
 # 3.  Render the DAG figure
 python -m src.dag
 
-# 4.  Fit the three Bayesian models  (~5–8 min total on 4 cores with nutpie)
+# 4.  Fit the three Bayesian models  (~5-8 min total on 4 cores with nutpie)
 python scripts/fit_binomial.py --use-nutpie
 python scripts/fit_revenue.py  --use-nutpie
 python scripts/fit_review.py   --use-nutpie
@@ -81,4 +83,4 @@ The `analytics.quality_diagnostics` table runs five integrity checks at the end 
 
 ## License
 
-Code: MIT. Data: Olist Brazilian E-commerce Public Dataset © Olist Store, released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) — non-commercial portfolio use is fine.
+Code: MIT. Data: Olist Brazilian E-commerce Public Dataset © Olist Store, released under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) - non-commercial portfolio use is fine.

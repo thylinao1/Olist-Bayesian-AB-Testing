@@ -1,9 +1,9 @@
 """Fit the DiD-corrected ordered-logit review-score model.
 
 Decomposes the combined treatment into:
-    beta_eligible — basket-size structural effect on review scores
-    beta_post     — common time trend
-    delta_C[c]    — POLICY EFFECT, varying by category
+    beta_eligible - basket-size structural effect on review scores
+    beta_post     - common time trend
+    delta_C[c]    - POLICY EFFECT, varying by category
 
 Usage:
     python scripts/fit_review_did.py

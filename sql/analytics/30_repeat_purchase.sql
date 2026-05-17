@@ -1,7 +1,7 @@
 -- ============================================================================
--- analytics.repeat_purchase — gap-and-island session reconstruction
+-- analytics.repeat_purchase - gap-and-island session reconstruction
 -- ----------------------------------------------------------------------------
--- For each customer we want to identify "purchase sessions" — clusters of
+-- For each customer we want to identify "purchase sessions" - clusters of
 -- orders separated by a long inactive gap. Standard gap-and-island pattern:
 --
 --   1. order the customer's events by timestamp

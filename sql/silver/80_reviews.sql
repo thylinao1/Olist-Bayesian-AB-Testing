@@ -1,5 +1,5 @@
 -- ============================================================================
--- silver.order_reviews — one row per order
+-- silver.order_reviews - one row per order
 -- ----------------------------------------------------------------------------
 -- Source has occasional duplicates per order_id (a customer can sometimes edit
 -- a review). We keep the most recently answered version using ROW_NUMBER.

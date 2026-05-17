@@ -1,5 +1,5 @@
 -- ============================================================================
--- BRONZE LAYER — raw CSV ingestion
+-- BRONZE LAYER - raw CSV ingestion
 -- ----------------------------------------------------------------------------
 -- Goal: get every Olist CSV into DuckDB with as little transformation as
 -- possible. Types are explicit so we don't pay the price of bad inference
@@ -67,7 +67,7 @@ FROM read_csv(
 
 
 -- ---- order_reviews ---------------------------------------------------------
--- review_comment_message has commas + line breaks — DuckDB handles quoted CSV
+-- review_comment_message has commas + line breaks - DuckDB handles quoted CSV
 -- fields, but we pin types just in case.
 CREATE TABLE bronze.order_reviews AS
 SELECT *

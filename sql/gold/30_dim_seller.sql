@@ -1,5 +1,5 @@
 -- ============================================================================
--- gold.dim_seller — seller-level aggregates + tenure-based tier
+-- gold.dim_seller - seller-level aggregates + tenure-based tier
 -- ----------------------------------------------------------------------------
 -- Seller tier is one of the two grouping levels in the hierarchical model
 -- (the other is product category). We need it to be:
