@@ -79,9 +79,27 @@ python scripts/fit_review.py   --use-nutpie
 
 # 5.  Classical baselines (instant)
 python scripts/run_baselines.py
+
+# 6.  Causal-identification checks (instant; on saved fits)
+python scripts/parallel_trends.py   # formal pre-trend test for the DiD
+python scripts/bunching_test.py     # McCrary-style density check at R$ 150
+python scripts/posterior_predictive_checks.py
+python scripts/model_comparison.py
+python scripts/cost_benefit_envelope.py
+python scripts/category_recommendations.py
 ```
 
 The `analytics.quality_diagnostics` table runs five integrity checks at the end of every ETL pass. The fit scripts each run a prior-predictive sanity check before sampling and dump R̂, ESS, and divergence counts after.
+
+## Tests
+
+A pytest suite under `tests/` covers treatment-assignment correctness, PyMC model construction (including the κ[0]-anchoring invariant), and DuckDB integration. Run with:
+
+```
+pytest tests/ -v
+```
+
+11 unit tests run anywhere (no Kaggle data needed). 6 integration tests auto-skip if the DuckDB warehouse isn't built. A GitHub Actions workflow at `.github/workflows/ci.yml` runs the unit tests + smoke test on every push.
 
 ---
 
