@@ -26,6 +26,10 @@ The headline question - *"would a hypothetical free-shipping-above-R\$ 150 polic
 
 DuckDB (storage + SQL engine, full window-function support) · Python 3.11 · PyMC 5 + ArviZ + nutpie (Rust-backed NUTS sampler) · NetworkX (DAG) · matplotlib, seaborn (figures) · scipy + statsmodels (classical baselines).
 
+**On scalability.** NUTS MCMC at this scale (97k orders × ~120 free parameters, ~5 min per fit on 4 cores with `nutpie`) is appropriate for portfolio depth and uncertainty quantification, but would not support daily model refreshes at Shopee or TikTok Shop data volumes. For production deployment at those scales the realistic alternatives are: (1) variational inference (`pm.fit(method="advi")`), which trades some posterior-tail fidelity for ~100x speedup; (2) Laplace approximation around the posterior mode, sufficient when the likelihood is well-behaved; (3) a frequentist DiD-logistic, which runs in milliseconds and (as the cross-method triangulation in §4.1 of the report shows) returns essentially the same point estimate as the Bayesian fit. The full MCMC was chosen here because the project is about methodological depth — credible intervals over latent decomposition channels — not real-time production scoring.
+
+**On the geolocation data.** Olist ships a 1M-row geolocation table (one row per zip-prefix × lat/lng observation). The silver layer deduplicates it to one centroid per zip prefix, then the seller dimension joins on `seller_zip_code_prefix` to attach lat/lng to each seller. Customer state and seller state are used as adjustment-set variables in the models (per the DAG). The raw lat/lng coordinates themselves are not used in the current models — a natural extension would be a distance-to-seller covariate as a delivery-time confound, or a Gaussian-process state-level effect, but neither was needed for the headline analysis.
+
 ---
 
 ## Repository layout

@@ -41,7 +41,7 @@ import duckdb
 import numpy as np
 import pandas as pd
 import pymc as pm
-from pymc.distributions.transforms import ordered
+import pytensor.tensor as pt
 
 from ..paths import DUCKDB_PATH
 
@@ -132,12 +132,13 @@ def build_model_data(df: pd.DataFrame) -> ReviewModelData:
 # ---------------------------------------------------------------------------
 def build_ordered_logit(d: ReviewModelData) -> pm.Model:
     coords = {
-        "obs":         np.arange(len(d.review_score)),
-        "category":    np.asarray(d.category_labels) if d.category_labels
-                        else np.arange(d.n_categories),
-        "seller_tier": np.arange(d.n_seller_tiers),
-        "month":       np.arange(d.n_months),
-        "cutpoint":    np.arange(d.K - 1),
+        "obs":           np.arange(len(d.review_score)),
+        "category":      np.asarray(d.category_labels) if d.category_labels
+                          else np.arange(d.n_categories),
+        "seller_tier":   np.arange(d.n_seller_tiers),
+        "month":         np.arange(d.n_months),
+        "cutpoint":      np.arange(d.K - 1),
+        "cutpoint_free": np.arange(d.K - 2),
     }
 
     with pm.Model(coords=coords) as model:
@@ -147,14 +148,26 @@ def build_ordered_logit(d: ReviewModelData) -> pm.Model:
         month_idx   = pm.Data("month_idx", d.month_idx,       dims="obs")
         treatment   = pm.Data("treatment", d.treatment,       dims="obs")
 
-        # ---- Cutpoints (kappa_1 < kappa_2 < kappa_3 < kappa_4) ----------
-        # Initial values evenly space the cutpoints to start ordered.
-        init_cuts = np.linspace(-2.0, 2.0, d.K - 1)
-        kappa = pm.Normal(
+        # ---- Cutpoints with kappa[0] anchored at 0 ----------------------
+        # The cumulative-logit model has a known ridge in the posterior:
+        # shifting all kappa[k] by +c and beta_bar by -c leaves the
+        # likelihood unchanged, so kappa and beta_bar are not separately
+        # identified. Anchoring kappa[0] = 0 breaks that ridge while
+        # losing no expressive power (the location is absorbed by beta_bar).
+        #
+        # Implementation: kappa = [0, cumsum(positive gaps)]. The gaps
+        # have HalfNormal priors which guarantee strictly-increasing
+        # cutpoints by construction without needing the `ordered`
+        # transform.
+        kappa_gaps = pm.HalfNormal(
+            "kappa_gaps",
+            sigma=1.5,
+            initval=np.full(d.K - 2, 1.0),
+            dims="cutpoint_free",
+        )
+        kappa = pm.Deterministic(
             "kappa",
-            mu=0.0, sigma=1.5,
-            transform=ordered,
-            initval=init_cuts,
+            pt.concatenate([pt.zeros(1), pt.cumsum(kappa_gaps)]),
             dims="cutpoint",
         )
 
