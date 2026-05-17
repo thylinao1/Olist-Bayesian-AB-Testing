@@ -183,45 +183,36 @@ def main() -> None:
     ))
 
     # ---- Recommendation summary -----------------------------------------
-    lines.append("## Recommendation summary")
-    lines.append("")
-    lines.append("If the platform were to roll the free-shipping policy out "
-                 "to a *subset* of categories rather than universally, the "
-                 "ones where the on-time lift, the conditional-spend lift, "
-                 "and the review-score impact are jointly most favourable "
-                 "are the ones to target. A simple aggregate score is the "
-                 "sum of standardised per-category mean policy effects "
-                 "across the four outcomes (negating the review effect "
-                 "since lower is worse).")
-    lines.append("")
-
-    # Aggregate score: standardise each, sum signed
-    def z(s):
-        return (s - s.mean()) / s.std()
-
-    agg = (
-        on_time[["category", "mean"]].rename(columns={"mean": "on_time"})
-        .merge(repeat[["category", "mean"]].rename(columns={"mean": "repeat"}),  on="category", how="outer")
-        .merge(spend [["category", "mean"]].rename(columns={"mean": "spend"}),   on="category", how="outer")
-        .merge(review[["category", "mean"]].rename(columns={"mean": "review"}),  on="category", how="outer")
-    ).dropna()
-    agg["score"] = (
-        z(agg["on_time"]) + z(agg["repeat"]) + z(agg["spend"]) - z(agg["review"])
-    )
-    agg = agg.sort_values("score", ascending=False).head(8)
-    lines.append("| Rank | Category | Aggregate z-score | δ on-time | δ repeat | δ spend | δ review |")
-    lines.append("|---|---|---|---|---|---|---|")
-    for rank, row in enumerate(agg.itertuples(), 1):
-        lines.append(
-            f"| {rank} | {row.category} | {row.score:+.2f} | "
-            f"{row.on_time:+.3f} | {row.repeat:+.3f} | "
-            f"{row.spend:+.3f} | {row.review:+.3f} |"
-        )
+    lines.append("## How to read these tables together (no aggregate score)")
     lines.append("")
     lines.append(
-        "Categories at the top of this list are where every channel of the "
-        "policy is most favourable simultaneously. They are the natural "
-        "first wave for a phased rollout."
+        "Earlier drafts of this report ranked categories by summing "
+        "standardised z-scores across the four outcomes. That ranking was "
+        "**methodologically unsound** because the four scales are not "
+        "commensurable: logit, log, and cumulative-logit effects measured "
+        "on different latent variables don't add up to a meaningful unit "
+        "even after standardising. We removed that table in line with "
+        "§8 of the main report (`reports/final_report.md`)."
+    )
+    lines.append("")
+    lines.append(
+        "The defensible way to read these per-outcome tables together: "
+        "look for categories that appear in *multiple* favourable lists "
+        "(on-time top-5, retention top-5, conditional-spend top-5) AND "
+        "are *absent* from the review-hurts-most list. Those are the "
+        "candidates for a phased rollout. Categories like `fashion_shoes`, "
+        "`office_furniture`, and `watches_gifts` tend to satisfy this "
+        "criterion in the per-outcome tables above; `auto` and "
+        "`furniture_decor` lead on-time lift but carry the largest review "
+        "cost, so they would only belong in a first wave if the platform "
+        "has a separate plan to manage customer expectations there."
+    )
+    lines.append("")
+    lines.append(
+        "Any cardinal aggregation across the four outcomes requires "
+        "domain-defined weights (e.g., GMV contribution margins, "
+        "lifetime-value cost of a one-star review drop). Those weights "
+        "are not in the public Olist data and we do not invent them."
     )
 
     # ---- Write -----------------------------------------------------------

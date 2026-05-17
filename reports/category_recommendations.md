@@ -54,19 +54,10 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 | 4 | baby | -0.247 | (-0.506, -0.031) | 1.6% |
 | 5 | consoles_games | -0.244 | (-0.569, +0.024) | 3.9% |
 
-## Recommendation summary
+## How to read these tables together (no aggregate score)
 
-If the platform were to roll the free-shipping policy out to a *subset* of categories rather than universally, the ones where the on-time lift, the conditional-spend lift, and the review-score impact are jointly most favourable are the ones to target. A simple aggregate score is the sum of standardised per-category mean policy effects across the four outcomes (negating the review effect since lower is worse).
+Earlier drafts of this report ranked categories by summing standardised z-scores across the four outcomes. That ranking was **methodologically unsound** because the four scales are not commensurable: logit, log, and cumulative-logit effects measured on different latent variables don't add up to a meaningful unit even after standardising. We removed that table in line with §8 of the main report (`reports/final_report.md`).
 
-| Rank | Category | Aggregate z-score | δ on-time | δ repeat | δ spend | δ review |
-|---|---|---|---|---|---|---|
-| 1 | auto | +6.28 | +0.348 | +0.077 | +0.158 | -0.279 |
-| 2 | fashion_shoes | +4.56 | +0.116 | +0.099 | +0.190 | -0.192 |
-| 3 | office_furniture | +3.90 | +0.094 | +0.097 | +0.170 | -0.199 |
-| 4 | air_conditioning | +3.28 | +0.240 | +0.080 | +0.130 | -0.203 |
-| 5 | furniture_living_room | +3.23 | +0.290 | +0.066 | +0.131 | -0.225 |
-| 6 | furniture_decor | +3.07 | +0.427 | +0.052 | +0.081 | -0.258 |
-| 7 | watches_gifts | +3.06 | +0.002 | +0.082 | +0.191 | -0.235 |
-| 8 | bed_bath_table | +3.01 | +0.227 | +0.087 | +0.072 | -0.241 |
+The defensible way to read these per-outcome tables together: look for categories that appear in *multiple* favourable lists (on-time top-5, retention top-5, conditional-spend top-5) AND are *absent* from the review-hurts-most list. Those are the candidates for a phased rollout. Categories like `fashion_shoes`, `office_furniture`, and `watches_gifts` tend to satisfy this criterion in the per-outcome tables above; `auto` and `furniture_decor` lead on-time lift but carry the largest review cost, so they would only belong in a first wave if the platform has a separate plan to manage customer expectations there.
 
-Categories at the top of this list are where every channel of the policy is most favourable simultaneously. They are the natural first wave for a phased rollout.
+Any cardinal aggregation across the four outcomes requires domain-defined weights (e.g., GMV contribution margins, lifetime-value cost of a one-star review drop). Those weights are not in the public Olist data and we do not invent them.
