@@ -44,41 +44,60 @@ warnings.filterwarnings("ignore")
 ASSUMED_INCREMENTAL_MARGIN = 0.20
 
 
-def query_freight_by_eligibility(threshold: float) -> dict:
-    """Pull avg freight + counts for eligible vs ineligible orders."""
+def query_freight_by_eligibility(threshold: float, cutover_week) -> dict:
+    """Pull avg freight + counts split by (eligible, post-cutover).
+
+    The bug we're fixing: subsidy cost in a real deployment only applies
+    to orders that are BOTH eligible AND placed after the policy goes
+    live. Earlier versions of this script multiplied avg freight by the
+    full eligible count (pre + post), inflating the subsidy ~2x.
+    """
     sql = f"""
         SELECT
-            (items_subtotal >= {threshold})            AS eligible,
-            COUNT(*)                                   AS n_orders,
-            AVG(items_freight)                         AS avg_freight,
-            AVG(items_subtotal)                        AS avg_subtotal,
-            AVG(payment_total)                         AS avg_payment
+            (items_subtotal >= {threshold})                 AS eligible,
+            (purchase_week >= DATE '{cutover_week.date()}') AS post,
+            COUNT(*)                                        AS n_orders,
+            AVG(items_freight)                              AS avg_freight,
+            AVG(items_subtotal)                             AS avg_subtotal,
+            AVG(payment_total)                              AS avg_payment
         FROM gold.fact_orders
         WHERE items_subtotal IS NOT NULL
           AND items_freight  IS NOT NULL
-        GROUP BY 1
+          AND purchase_week  IS NOT NULL
+        GROUP BY 1, 2
     """
     with duckdb.connect(str(DUCKDB_PATH), read_only=True) as con:
         rows = con.execute(sql).fetchall()
-    return {bool(r[0]): {
-        "n_orders":     int(r[1]),
-        "avg_freight":  float(r[2]),
-        "avg_subtotal": float(r[3]),
-        "avg_payment":  float(r[4]),
+    return {(bool(r[0]), bool(r[1])): {
+        "n_orders":     int(r[2]),
+        "avg_freight":  float(r[3]),
+        "avg_subtotal": float(r[4]),
+        "avg_payment":  float(r[5]),
     } for r in rows}
 
 
 def main() -> None:
     print("Loading freight stats from DuckDB...")
     _, spec, _ = build_modelling_frame()
-    by_elig = query_freight_by_eligibility(spec.subtotal_threshold_brl)
-    elig = by_elig[True]
-    inel = by_elig[False]
-    print(f"  eligible:   n={elig['n_orders']:,}, "
-          f"avg_freight=R$ {elig['avg_freight']:.2f}, "
-          f"avg_payment=R$ {elig['avg_payment']:.2f}")
-    print(f"  ineligible: n={inel['n_orders']:,}, "
-          f"avg_freight=R$ {inel['avg_freight']:.2f}")
+    cells = query_freight_by_eligibility(
+        spec.subtotal_threshold_brl, spec.cutover_week,
+    )
+    # The treated cell (eligible AND post-cutover) is the only one that would
+    # actually receive the policy subsidy if Olist switched it on at the
+    # cutover week.
+    treated = cells[(True,  True)]
+    pre_elig = cells[(True,  False)]
+    post_inel = cells[(False, True)]
+    pre_inel = cells[(False, False)]
+    print(f"  treated (post AND eligible):       n={treated['n_orders']:>6,}, "
+          f"avg_freight=R$ {treated['avg_freight']:.2f}, "
+          f"avg_payment=R$ {treated['avg_payment']:.2f}")
+    print(f"  pre-cutover  eligible (NOT subs.): n={pre_elig['n_orders']:>6,}, "
+          f"avg_freight=R$ {pre_elig['avg_freight']:.2f}")
+    print(f"  post-cutover ineligible:           n={post_inel['n_orders']:>6,}")
+    print(f"  pre-cutover  ineligible:           n={pre_inel['n_orders']:>6,}")
+    # Backward-compatible variable names for the calc below.
+    elig = treated
 
     print("Loading posterior means from DiD traces...")
     rev = az.from_netcdf(str(DUCKDB_DIR / "revenue_did_idata.nc"))
@@ -94,6 +113,10 @@ def main() -> None:
     print(f"  conditional spend multiplier (treated / control) = {spend_mult:.4f}")
 
     # ---- Envelope computation -----------------------------------------
+    # N_elig is now the POST-CUTOVER eligible count (the only orders that
+    # would actually receive the subsidy if the policy went live at the
+    # cutover week). Earlier versions of this script accidentally used the
+    # pre+post eligible total, inflating subsidy cost ~2x.
     N_elig = elig["n_orders"]
     subsidy_per_eligible = elig["avg_freight"]
     subsidy_cost_total = N_elig * subsidy_per_eligible

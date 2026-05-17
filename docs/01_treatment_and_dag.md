@@ -54,7 +54,7 @@ Three outcomes, each modelled with its own likelihood:
 | `F` | Freight value charged | **Mediator (pipe)** - `T` reduces `F`; `F` lifts conversion |
 | `B` | Number of basket items | **Mediator (pipe)** - `T` incentivises larger baskets |
 | `D` | Delivery days | **Mediator (pipe)** - basket size and category affect delivery time |
-| `R` | Customer leaves a review | **Collider** - caused by the treatment effect AND the outcome experience |
+| `R` | Customer leaves a review | **Descendant of Y** - caused by the outcome experience (Y) only. Earlier drafts of this DAG drew a T → R edge as well, making R a collider; we dropped it because the claim (treatment changes whether someone bothers to leave a review) is weak and keeping it would have required handling collider-conditioning when filtering the review panel to non-null scores. |
 
 ---
 
@@ -103,7 +103,7 @@ Following the standard backdoor-adjustment recipe:
 | 4 | `T ← M → Y` | open (fork at M) | yes | **condition on M** |
 | 5 | `T → F → Y` | open (pipe) | **no** - leaves T forward | **do NOT condition on F** (post-treatment bias) |
 | 6 | `T → B → D → Y` | open (pipe) | **no** - leaves T forward | **do NOT condition on B or D** |
-| 7 | `T → R ← Y` | closed (collider at R) | no | **do NOT condition on R** (would open the collider) |
+| 7 | `T → Y → R` | open (pipe through Y) | **no** - leaves T forward via Y | **do NOT condition on R** (conditioning on a descendant of Y would weakly partial-out Y; we filter `review_score IS NOT NULL` for the review-score analysis, which is mild selection on R, acknowledged in §9 Limitations of the main report) |
 
 ### Adjustment set
 

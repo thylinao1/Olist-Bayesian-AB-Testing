@@ -45,14 +45,23 @@ EDGES: list[tuple[str, str]] = [
     ("T", "B"),     # treatment incentivises larger baskets
     ("B", "D"),     # bigger baskets take longer to ship
     ("D", "Y"),
-    # Collider - caused by both T (review prompts vary by treatment) and Y
-    ("T", "R"),
+    # Descendant of the outcome (caused by Y, NOT by T). Earlier drafts of
+    # this DAG had a T -> R edge representing "treatment changes whether a
+    # review is left", which made R a collider and meant filtering review
+    # observations on review_score IS NOT NULL would be collider
+    # conditioning. We dropped the T -> R edge because the claim is weak
+    # (free shipping is unlikely to change whether a customer bothers to
+    # leave a review at all) and keeping it forced a selection-bias caveat
+    # we couldn't easily address with this static panel.
     ("Y", "R"),
 ]
 
 CONFOUNDERS: set[str] = {"C", "S", "G", "M"}
 MEDIATORS:   set[str] = {"F", "B", "D"}
-COLLIDERS:   set[str] = {"R"}
+# R is now a descendant of Y only (not a collider). Conditioning on R is
+# weak conditioning on Y itself - mild selection effect, not the open-path
+# bias that conditioning on a true collider would create.
+DESCENDANTS: set[str] = {"R"}
 EXPOSURE:   str = "T"
 OUTCOME:    str = "Y"
 
@@ -141,7 +150,7 @@ NODE_COLOURS = {
     "Y": "#ed7d31",
     **{n: "#a9d18e" for n in CONFOUNDERS},
     **{n: "#f4b183" for n in MEDIATORS},
-    **{n: "#bfbfbf" for n in COLLIDERS},
+    **{n: "#bfbfbf" for n in DESCENDANTS},
 }
 
 
@@ -184,7 +193,7 @@ def render(g: nx.DiGraph, out_path: Path) -> None:
                    label="mediator - do NOT adjust"),
         plt.Line2D([], [], marker="o", linestyle="", markersize=10,
                    markerfacecolor="#bfbfbf", markeredgecolor="black",
-                   label="collider - do NOT adjust"),
+                   label="descendant of Y (weak selection only)"),
     ]
     ax.legend(handles=legend_handles, loc="lower left", fontsize=8, frameon=False)
 

@@ -39,7 +39,7 @@ Three hierarchical Bayesian models give a posterior over the answer. Each runs o
 
 ### The business punchline
 
-Sizing the policy in R$ using the actual freight data and the DiD posterior means: **the freight subsidy cost is ~R$ 855K against ~R$ 8.6K of incremental contribution margin** at a conservative 20% rate. The policy loses about R$ 850K net at this design point — even though the per-customer Welch result was a positive +R$ 1.90. Most analyses stop at the +R$ 1.90; doing the full envelope kills the policy at this design point, which is *the right answer* given the posterior. Full numbers in §7.
+Sizing the policy in R$ using the actual freight data and the DiD posterior means: **the freight subsidy cost is ~R$ 457K against ~R$ 4.4K of incremental contribution margin** at a conservative 20% rate. The policy loses about R$ 452K net at this design point — even though the per-customer Welch result was a positive +R$ 1.90. Most analyses stop at the +R$ 1.90; doing the full envelope kills the policy at this design point, which is *the right answer* given the posterior. Full numbers in §7.
 
 ### The integrated narrative (DiD-corrected, all four outcomes)
 
@@ -108,7 +108,24 @@ The conditional independencies the DAG implies are tested in `notebooks/02_dag_t
 
 ## 4. The three Bayesian models
 
-Each model uses the same adjustment set, the same hierarchical pattern, and the same non-centered parameterisation that the standard reference recommends for stability.
+Each model uses the same hierarchical pattern (varying intercept and varying treatment slope by product category, with non-centered priors for stability). The adjustment set differs per model in a way that the DAG argument tolerates but is worth disclosing honestly up front:
+
+| Model | Grain | Adjustment set actually in the linear predictor |
+|---|---|---|
+| Binomial naive (§4.1) | order-cell × month | full `{C, S, G, M}` |
+| Binomial DiD (§4.1) | order-cell, month absorbed into `post` | `{C, S, G}` + `eligible` + `post` (M collapsed) |
+| Revenue hurdle (§4.2) | per-customer | `{C}` only + `log_first_subtotal` as a continuous adjuster |
+| Revenue DiD (§4.2) | per-customer | `{C}` + `eligible` + `post` + `log_first_subtotal` |
+| Review naive (§4.3) | per-order | `{C, S, M}` |
+| Review DiD (§4.3) | per-order, month absorbed into `post` | `{C, S}` + `eligible` + `post` |
+
+Why each is defensible:
+
+- **Binomial DiD** drops month because `post` is a binary partition of the time axis and would be collinear with monthly fixed effects in a single linear predictor. The `β_post` coefficient absorbs the seasonal time trend across the cutover.
+- **Revenue models** are at the *per-customer* grain (one row per customer's first order, with downstream spend rolled up). At that grain, seller tier (per-order), customer state, and calendar month are less informative than at order grain — most customers shop with one seller, in one state, in one month, so the variance these covariates explain is already concentrated in the category effect. `log_first_subtotal` is the meaningful continuous adjuster and stays in.
+- **Review DiD** drops month for the same reason as binomial DiD, and drops customer state because `gamma_G` has very low ESS in earlier review fits — the empirical state-level variation is small relative to the noise floor of an ordered-logit fit on 30k rows.
+
+This is a real divergence from the DAG's full `{C, S, G, M}` adjustment set. Future work would re-fit each model with the full set and check whether `delta_bar` shifts materially; the current expectation is that it would not (the DAG arrows from S/G/M to T are weak in this synthetic intervention), but that should be verified rather than asserted.
 
 ### 4.1 Hierarchical Binomial - on-time delivery
 
@@ -261,7 +278,7 @@ The cutpoints κ are constrained-ordered via PyMC's `transforms.ordered`. The in
 - Cutpoints κ have low ESS (~41) - the standard mild non-identifiability between the cutpoints and the linear-predictor intercept in cumulative-logit models. The treatment effect itself has ESS_bulk = 1344, so the inference on τ is solid; the ESS warning is on parameters we don't quote in the headline.
 
 **Cross-validation against classical baselines**:
-- Empirical means: control 4.176, treated 4.044 - a **-0.13 shift in mean review score**.
+- Empirical means: control 4.176, treated 4.034 - a **-0.14 shift in mean review score** (matches the chi-square baseline in §5).
 - Chi-square test of independence (review × treatment): χ² = 201, p < 0.0001.
 - Mann-Whitney U on review score: p < 0.0001.
 - The Bayesian τ̅ = -0.158 (cumulative-logit) is fully consistent in direction and magnitude with the empirical mean shift.
@@ -348,14 +365,14 @@ What we can confirm from the LOO output:
 
 The Bayesian posteriors above give us the policy's effect on three KPIs, but a recruiter naturally asks "what does this mean in money?". The script `scripts/cost_benefit_envelope.py` combines the posterior means from the DiD revenue model with a SQL query for average freight cost per eligible order, producing a sized envelope. Output is written to [`reports/cost_benefit_envelope.md`](cost_benefit_envelope.md).
 
-**Inputs from the actual Olist data:**
+**Inputs from the actual Olist data** (the subsidy applies *only* to orders that are both eligible AND post-cutover — earlier drafts incorrectly used the pre+post eligible total, inflating the subsidy cost ~2×):
 
 | Quantity | Value |
 |---|---|
 | Subtotal-eligibility threshold | R$ 150 |
-| N eligible orders (panel total) | 24,253 |
-| Avg freight on an eligible order | R$ 35.27 |
-| Avg payment on an eligible order | R$ 382.41 |
+| N post-cutover eligible orders (the subsidy denominator) | 12,405 |
+| Avg freight on a post-cutover eligible order | R$ 36.83 |
+| Avg payment on a post-cutover eligible order | R$ 381.95 |
 | Baseline P(repeat within 180d) | 2.64% (posterior mean of α_bar) |
 | Treated P(repeat within 180d) | 2.81% (α_bar + δ_b_bar) |
 | Conditional spend lift | ×1.097 (exp δ_l_bar) |
@@ -365,14 +382,14 @@ The Bayesian posteriors above give us the policy's effect on three KPIs, but a r
 
 | Line | R$ |
 |---|---|
-| Subsidy cost (N × avg freight) | **855,390** |
-| Incremental GMV from policy | 42,909 |
-| Incremental margin @ 20% | 8,582 |
-| **Net envelope (margin − subsidy)** | **−846,808** |
+| Subsidy cost (N_post_eligible × avg freight) | **456,879** |
+| Incremental GMV from policy | 21,921 |
+| Incremental margin @ 20% | 4,384 |
+| **Net envelope (margin − subsidy)** | **−452,495** |
 
-**The policy loses ~R$ 850K under reasonable assumptions.** Break-even contribution margin would need to be `855k / 43k ≈ 1996%` (impossible), or equivalently the DiD spend multiplier would need to be ~100× larger than what the posterior actually estimates. **At this design point — R$ 150 threshold, 180-day window, observed lift magnitudes — the policy is not commercially viable.**
+**The policy loses ~R$ 452K under reasonable assumptions.** Break-even contribution margin would need to be `subsidy / incremental_GMV ≈ 2084%` (impossible), or equivalently the DiD spend multiplier would need to be roughly two orders of magnitude larger than the posterior estimates. **At this design point — R$ 150 threshold, 180-day window, observed lift magnitudes — the policy is not commercially viable.**
 
-This is a crucial finding for an honest portfolio. Most analyses stop at "+R$ 1.90 per customer" or "+10% conditional spend" and never size against the cost of running the policy. Doing the envelope kills the policy at this design point, which is *the right answer* given the posterior. A real platform would respond by either (a) lowering the threshold to expand the eligible pool of customers most likely to convert (which itself would change basket dynamics — see Limitations §8), (b) targeting only the per-category subset where the policy is most favourable (see §8 recommendations), or (c) bundling the policy with a non-freight cost reduction.
+This is a crucial finding for an honest portfolio. Most analyses stop at "+R$ 1.90 per customer" or "+10% conditional spend" and never size against the cost of running the policy. Doing the envelope kills the policy at this design point, which is *the right answer* given the posterior. A real platform would respond by either (a) lowering the threshold to expand the eligible pool of customers most likely to convert (which itself would change basket dynamics — see Limitations §9), (b) targeting only the per-category subset where the policy is most favourable (see §8 recommendations), or (c) bundling the policy with a non-freight cost reduction.
 
 **What this envelope omits**: lifetime-value impact beyond 180 days, review-score-driven brand effects, seller-side price responses, and threshold-bunching dynamics — all in §9 Limitations.
 
