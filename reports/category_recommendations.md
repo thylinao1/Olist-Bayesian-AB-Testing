@@ -38,21 +38,21 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 
 | Rank | Category | δ̅ | 94% HDI | P(δ>0) |
 |---|---|---|---|---|
-| 1 | toys | -0.024 | (-0.277, +0.349) | 40.2% |
-| 2 | musical_instruments | -0.071 | (-0.332, +0.338) | 28.6% |
-| 3 | pet_shop | -0.097 | (-0.334, +0.248) | 23.2% |
-| 4 | home_appliances | -0.098 | (-0.345, +0.251) | 22.5% |
-| 5 | perfumery | -0.108 | (-0.322, +0.188) | 19.4% |
+| 1 | toys | -0.024 | (-0.280, +0.337) | 39.6% |
+| 2 | musical_instruments | -0.055 | (-0.314, +0.320) | 33.4% |
+| 3 | pet_shop | -0.088 | (-0.327, +0.260) | 25.0% |
+| 4 | home_appliances | -0.100 | (-0.349, +0.258) | 23.5% |
+| 5 | perfumery | -0.106 | (-0.331, +0.208) | 20.7% |
 
 ### Review score - bottom 5 categories where the policy hurts MOST
 
 | Rank | Category | δ̅ | 94% HDI | P(δ>0) |
 |---|---|---|---|---|
-| 1 | sports_leisure | -0.320 | (-0.566, -0.124) | 0.0% |
-| 2 | auto | -0.277 | (-0.519, -0.077) | 0.4% |
-| 3 | furniture_decor | -0.259 | (-0.475, -0.087) | 0.5% |
-| 4 | baby | -0.246 | (-0.499, -0.025) | 1.9% |
-| 5 | consoles_games | -0.242 | (-0.537, +0.011) | 3.6% |
+| 1 | sports_leisure | -0.326 | (-0.583, -0.121) | 0.0% |
+| 2 | auto | -0.279 | (-0.521, -0.085) | 0.4% |
+| 3 | furniture_decor | -0.258 | (-0.484, -0.072) | 0.5% |
+| 4 | baby | -0.247 | (-0.506, -0.031) | 1.6% |
+| 5 | consoles_games | -0.244 | (-0.569, +0.024) | 3.9% |
 
 ## Recommendation summary
 
@@ -60,13 +60,13 @@ If the platform were to roll the free-shipping policy out to a *subset* of categ
 
 | Rank | Category | Aggregate z-score | δ on-time | δ repeat | δ spend | δ review |
 |---|---|---|---|---|---|---|
-| 1 | auto | +6.32 | +0.348 | +0.077 | +0.158 | -0.277 |
-| 2 | fashion_shoes | +4.53 | +0.116 | +0.099 | +0.190 | -0.189 |
-| 3 | office_furniture | +3.87 | +0.094 | +0.097 | +0.170 | -0.196 |
-| 4 | air_conditioning | +3.45 | +0.240 | +0.080 | +0.130 | -0.210 |
-| 5 | furniture_living_room | +3.37 | +0.290 | +0.066 | +0.131 | -0.230 |
-| 6 | furniture_decor | +3.15 | +0.427 | +0.052 | +0.081 | -0.259 |
-| 7 | bed_bath_table | +3.07 | +0.227 | +0.087 | +0.072 | -0.242 |
-| 8 | watches_gifts | +2.99 | +0.002 | +0.082 | +0.191 | -0.229 |
+| 1 | auto | +6.28 | +0.348 | +0.077 | +0.158 | -0.279 |
+| 2 | fashion_shoes | +4.56 | +0.116 | +0.099 | +0.190 | -0.192 |
+| 3 | office_furniture | +3.90 | +0.094 | +0.097 | +0.170 | -0.199 |
+| 4 | air_conditioning | +3.28 | +0.240 | +0.080 | +0.130 | -0.203 |
+| 5 | furniture_living_room | +3.23 | +0.290 | +0.066 | +0.131 | -0.225 |
+| 6 | furniture_decor | +3.07 | +0.427 | +0.052 | +0.081 | -0.258 |
+| 7 | watches_gifts | +3.06 | +0.002 | +0.082 | +0.191 | -0.235 |
+| 8 | bed_bath_table | +3.01 | +0.227 | +0.087 | +0.072 | -0.241 |
 
 Categories at the top of this list are where every channel of the policy is most favourable simultaneously. They are the natural first wave for a phased rollout.

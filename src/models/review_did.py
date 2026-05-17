@@ -28,7 +28,7 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 import pymc as pm
-from pymc.distributions.transforms import ordered
+import pytensor.tensor as pt
 
 
 @dataclass(frozen=True)
@@ -71,11 +71,12 @@ def build_model_data_did(
 
 def build_did_ordered_logit(d: ReviewDiDData) -> pm.Model:
     coords = {
-        "obs":         np.arange(len(d.review_score)),
-        "category":    np.asarray(d.category_labels) if d.category_labels
-                        else np.arange(d.n_categories),
-        "seller_tier": np.arange(d.n_seller_tiers),
-        "cutpoint":    np.arange(d.K - 1),
+        "obs":           np.arange(len(d.review_score)),
+        "category":      np.asarray(d.category_labels) if d.category_labels
+                          else np.arange(d.n_categories),
+        "seller_tier":   np.arange(d.n_seller_tiers),
+        "cutpoint":      np.arange(d.K - 1),
+        "cutpoint_free": np.arange(d.K - 2),
     }
 
     with pm.Model(coords=coords) as model:
@@ -84,11 +85,19 @@ def build_did_ordered_logit(d: ReviewDiDData) -> pm.Model:
         eligible  = pm.Data("eligible",  d.eligible,        dims="obs")
         post      = pm.Data("post",      d.post,            dims="obs")
 
-        kappa = pm.Normal(
+        # Cutpoints with kappa[0] anchored at 0 to break the cumulative-logit
+        # location identifiability ridge with beta_bar. See review.py for the
+        # full justification. Implementation: kappa = [0, cumsum(positive gaps)]
+        # gives strictly-increasing cutpoints by construction.
+        kappa_gaps = pm.HalfNormal(
+            "kappa_gaps",
+            sigma=1.5,
+            initval=np.full(d.K - 2, 1.0),
+            dims="cutpoint_free",
+        )
+        kappa = pm.Deterministic(
             "kappa",
-            mu=0.0, sigma=1.5,
-            transform=ordered,
-            initval=np.linspace(-2.0, 2.0, d.K - 1),
+            pt.concatenate([pt.zeros(1), pt.cumsum(kappa_gaps)]),
             dims="cutpoint",
         )
 

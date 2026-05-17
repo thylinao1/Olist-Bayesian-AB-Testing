@@ -157,6 +157,24 @@ The zero-inflated revenue model and the ordered-categorical review model re-use 
 
 ---
 
-## 7. References & inspiration
+## 7. SUTVA & interference
+
+The hierarchical Bayesian models in this project assume the **stable-unit treatment value assumption** (SUTVA): the policy's effect on one order is independent of how the policy treats other orders. In a marketplace this assumption is plausible *as a first-pass* but not bulletproof, and an honest analysis needs to call out where it might fail.
+
+Two specific interference channels matter for a real free-shipping deployment:
+
+1. **Seller price adjustment.** Sellers know the platform is subsidising shipping for eligible baskets. To recover the margin they would otherwise have charged in freight, sellers may inflate the list price of items that frequently push a basket above the eligibility threshold. The treatment effect on per-order revenue would then partially reflect *seller pricing response* rather than genuine policy effect. The direction of this bias is upward — observed conditional spend lifts overstate the true policy effect.
+
+2. **Seller logistics prioritisation.** Eligible orders carry no freight margin for the seller (the platform pays it). Sellers may prioritise these orders for faster fulfilment to avoid penalties on delivery-time SLAs, *crowding out* faster handling of ineligible orders within the same warehouse capacity. The ineligible (control) group's on-time delivery rate would then degrade *because of* the policy applied to the eligible (treated) group. This is classical SUTVA violation — a treatment effect on a unit's neighbours. The bias direction here is also upward, because the control gets slower while the treated stays the same.
+
+Both channels would inflate the apparent policy effect relative to the true causal effect. Neither is detectable with the static observational data on hand — they require a real deployment to identify.
+
+**The cleanest fix for a real deployment is a clustered RCT.** Randomise at the *seller* level, not the order level: a randomly chosen subset of sellers participate in the free-shipping policy and the rest do not. This breaks both interference channels because (a) participating sellers cannot raise prices on customers visible to non-participating sellers without losing them, and (b) logistics prioritisation only crowds out other orders within the same seller, not across the marketplace. The cost is statistical power — clustered designs have effectively smaller sample sizes — and the design must be powered accordingly.
+
+For this portfolio analysis, the headline numbers should be read as *upper-bound estimates* of the policy effect under SUTVA-violating channels that the data cannot rule out.
+
+---
+
+## 8. References & inspiration
 
 The Bayesian methodology used here (DAGs and the four elemental confounds, hierarchical / partial-pooling models, non-centered parameterisations, hurdle and ordered-logit likelihoods) is drawn from Richard McElreath's *Statistical Rethinking* book and accompanying YouTube course.
