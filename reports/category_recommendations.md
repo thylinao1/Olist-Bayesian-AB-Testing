@@ -1,6 +1,6 @@
 # Where the policy is most worth running
 
-Per-category posterior summaries from the three DiD-corrected Bayesian models. Hierarchical partial pooling over the 73 product categories means each estimate borrows strength from the rest, so the rankings are robust to small-cell noise.
+Per-category posterior summaries from the three DiD-corrected Bayesian models. Hierarchical partial pooling over the 73 product categories means each estimate borrows strength from the rest, so the rankings are stable against small-cell noise.
 
 **How to read each table.** δ̅ is the policy effect on the model's link scale (logit for binomial / Bernoulli, log for spend, cumulative-logit for review). The HDI is the 94% credible interval. `P(δ>0)` is the posterior probability the policy *helps* the outcome in that category.
 
