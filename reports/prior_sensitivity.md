@@ -8,4 +8,4 @@ The headline on-time policy effect in section 4.1 uses an `Exponential(1)` prior
 | `Exponential(2)` | +0.1695 | (+0.0620, +0.2950) | 0.1979 | 99.6% | 3 |
 | `HalfNormal(1)` | +0.1696 | (+0.0515, +0.2884) | 0.1957 | 99.8% | 5 |
 
-The spread in `delta_bar` across the three runs is +0.0004 logit (~0.00 pp on the probability scale at the ~89% baseline). The headline +1.5 pp on-time policy effect is robust to the hyperprior choice - the posterior is dominated by the 97k-order likelihood, not by the prior.
+The spread in `delta_bar` across the three runs is +0.0004 logit (~0.00 pp on the probability scale at the ~89% baseline). The headline +1.5 pp on-time policy effect is insensitive to the hyperprior choice - the posterior is dominated by the 97k-order likelihood, not by the prior.
