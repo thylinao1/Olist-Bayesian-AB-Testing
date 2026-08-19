@@ -1,10 +1,10 @@
 # Where the policy is most worth running
 
-Per-category posterior summaries from the three DiD-corrected Bayesian models. Hierarchical partial pooling over the 73 product categories means each estimate borrows strength from the rest, so the rankings are robust to small-cell noise.
+Per-category posterior summaries from the three DiD-corrected Bayesian models. Hierarchical partial pooling over the 73 product categories means each estimate borrows strength from the rest, so the rankings are less sensitive to small-cell noise.
 
 **How to read each table.** δ̅ is the policy effect on the model's link scale (logit for binomial / Bernoulli, log for spend, cumulative-logit for review). The HDI is the 94% credible interval. `P(δ>0)` is the posterior probability the policy *helps* the outcome in that category.
 
-### On-time delivery - top 5 categories where the policy lifts most
+### On-time delivery: top 5 categories where the policy lifts most
 
 | Rank | Category | δ̅ (logit) | 94% HDI | P(δ>0) | ≈ Δ at base rate |
 |---|---|---|---|---|---|
@@ -14,7 +14,7 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 | 4 | home_appliances | +0.310 | (-0.038, +0.710) | 95.5% | +2.69 pp |
 | 5 | furniture_living_room | +0.290 | (-0.046, +0.698) | 94.7% | +2.53 pp |
 
-### P(repeat purchase) - top 5 categories where the policy lifts retention most
+### P(repeat purchase): top 5 categories where the policy lifts retention most
 
 | Rank | Category | δ̅ (logit) | 94% HDI | P(δ>0) | ≈ Δ at base rate |
 |---|---|---|---|---|---|
@@ -24,7 +24,7 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 | 4 | bed_bath_table | +0.087 | (-0.166, +0.354) | 74.2% | +0.20 pp |
 | 5 | cool_stuff | +0.086 | (-0.192, +0.384) | 73.0% | +0.20 pp |
 
-### Conditional spend if customer returns - top 5 categories
+### Conditional spend if customer returns: top 5 categories
 
 | Rank | Category | δ̅ (log) | × multiplier | 94% HDI | P(δ>0) |
 |---|---|---|---|---|---|
@@ -34,7 +34,7 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 | 4 | office_furniture | +0.170 | × 1.185 | (-0.083, +0.527) | 89.2% |
 | 5 | auto | +0.158 | × 1.171 | (-0.080, +0.469) | 89.3% |
 
-### Review score - top 5 categories where the policy hurts LEAST
+### Review score: top 5 categories where the policy hurts least
 
 | Rank | Category | δ̅ | 94% HDI | P(δ>0) |
 |---|---|---|---|---|
@@ -44,7 +44,7 @@ Per-category posterior summaries from the three DiD-corrected Bayesian models. H
 | 4 | home_appliances | -0.100 | (-0.349, +0.258) | 23.5% |
 | 5 | perfumery | -0.106 | (-0.331, +0.208) | 20.7% |
 
-### Review score - bottom 5 categories where the policy hurts MOST
+### Review score: bottom 5 categories where the policy hurts most
 
 | Rank | Category | δ̅ | 94% HDI | P(δ>0) |
 |---|---|---|---|---|

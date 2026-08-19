@@ -10,8 +10,6 @@
 --   3. cumulative sum of those flags = the session id
 --
 -- Output is at the order grain so it joins back to fact_orders cleanly.
--- This is the kind of SQL e-commerce data scientists use daily for
--- sessionisation and is a strong CV signal.
 -- ============================================================================
 
 CREATE OR REPLACE TABLE analytics.repeat_purchase AS

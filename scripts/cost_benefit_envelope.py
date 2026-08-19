@@ -9,8 +9,8 @@ table summarising the trade-off:
       revenue                * estimated_margin
     Net envelope             = incremental_margin - subsidy_cost
 
-This is a *rough envelope* not a forecast. Margin assumptions are explicit
-and conservative.
+This is a rough envelope rather than a forecast. Margin assumptions are
+explicit and conservative.
 
 Output: reports/cost_benefit_envelope.md  (and stdout).
 
@@ -123,7 +123,7 @@ def main() -> None:
 
     # Incremental revenue:
     #   Treated returners spend conditional_spend_lift more than control returners.
-    #   Repeat probability shift (delta_b_bar) is near-null in our DiD - we use
+    #   Repeat probability shift (delta_b_bar) is near-null in our DiD, so we use
     #   the model's posterior mean either way to be honest.
     avg_repeat_spend_control = elig["avg_payment"]   # rough proxy for typical second-order spend
     incremental_per_eligible = (
@@ -144,7 +144,7 @@ def main() -> None:
     lines: list[str] = []
     lines.append("# Cost-benefit envelope (rough)")
     lines.append("")
-    lines.append("**This is a back-of-envelope sanity check, not a forecast.** It uses "
+    lines.append("**This is a back-of-envelope sanity check rather than a forecast.** It uses "
                  "the posterior means from the DiD-corrected revenue model and the "
                  "actual freight statistics on Olist to size the policy's incremental "
                  "revenue vs subsidy cost. Margin assumptions are explicit and "
@@ -190,7 +190,7 @@ def main() -> None:
                  "margins on the incremental categories are above this threshold the policy "
                  "pays for itself; if below it does not. The DiD spend multiplier carries "
                  "wide uncertainty (94% HDI on the log scale crosses zero), so this envelope "
-                 "should be treated as a midpoint estimate, not a prediction.")
+                 "should be treated as a midpoint estimate rather than a prediction.")
     lines.append("")
     lines.append("**What the envelope omits.** Order-acquisition cost savings from retained "
                  "customers (not modelled), lifetime-value impact beyond the 180-day window, "

@@ -1,13 +1,13 @@
 """Bunching diagnostic at the R$ 150 eligibility threshold.
 
-In a *real* free-shipping deployment customers with R$ 120-149 baskets
+In a real free-shipping deployment, customers with R$ 120-149 baskets
 would have an incentive to pad their carts with filler items to clear the
 R$ 150 threshold. The static Olist data was generated WITHOUT such a
 threshold, so we should observe NO discontinuous density spike just above
 R$ 150 - the basket-size distribution should be smooth across the cutoff.
 
-This script verifies that, providing the McCrary-style sanity check that
-the senior review flagged as missing. If we ever found a spike here, the
+This script verifies that, and provides the McCrary-style density check
+the identification argument needs. If we ever found a spike here, the
 DiD analysis would be biased upward because the marginal-buyer composition
 just above the cutoff would differ systematically from just below.
 
@@ -108,7 +108,7 @@ def main() -> None:
     #   z < -1.96  : DEFICIT above threshold => pre-existing structural kink
     #                (typically psychological pricing at "just under" round
     #                numbers like R$ 149 vs R$ 150)
-    #   |z| < 1.96 : clean - density continuous across the cutoff
+    #   |z| < 1.96 : clean, density continuous across the cutoff
     policy_bunching = z_above > 1.96
     structural_kink = z_above < -1.96
 
@@ -125,7 +125,7 @@ def main() -> None:
                label=f"donut R$ {DONUT[0]:.0f}-{DONUT[1]:.0f} (excluded from fit)")
     ax.set_xlabel("Item subtotal (R$)")
     ax.set_ylabel("Number of orders")
-    ax.set_title("Bunching diagnostic - density of items_subtotal around R$ 150")
+    ax.set_title("Bunching diagnostic: density of items_subtotal around R$ 150")
     ax.legend(loc="upper right", fontsize=9, frameon=False)
     ax.grid(alpha=0.25)
 
@@ -180,12 +180,12 @@ def main() -> None:
     lines.append("")
     if policy_bunching:
         lines.append(
-            f"**Result: POLICY-INDUCED BUNCHING DETECTED** (Z = {z_above:+.2f}, "
+            f"**Result: policy-induced bunching detected** (Z = {z_above:+.2f}, "
             f"> +1.96). The bin just above R$ {THRESHOLD:.0f} has a "
             f"statistically significant *excess* of {excess_above:+.0f} orders "
             f"relative to the smooth counterfactual. This is the classic "
-            f"bunching signature - customers concentrated just above the "
-            f"cutoff - and it would invalidate the DiD identification "
+            f"bunching signature (customers concentrated just above the "
+            f"cutoff) and it would invalidate the DiD identification "
             f"because the marginal-buyer composition just above the "
             f"cutoff would differ systematically from just below. This is "
             f"NOT the expected finding for synthetic-treatment data, so "
@@ -194,10 +194,10 @@ def main() -> None:
         )
     elif structural_kink:
         lines.append(
-            f"**Result: STRUCTURAL DISCONTINUITY, NOT POLICY BUNCHING** "
+            f"**Result: a structural discontinuity rather than policy bunching** "
             f"(Z = {z_above:+.2f}, < -1.96). The bin just above R$ "
             f"{THRESHOLD:.0f} has a *deficit* of {-excess_above:+.0f} "
-            f"orders relative to the smooth counterfactual - the opposite "
+            f"orders relative to the smooth counterfactual, the opposite "
             f"direction from what policy-induced bunching would produce. "
             f"The most likely explanation is retail pricing structure: "
             f"sellers list items at psychological price points like R$ "
@@ -211,8 +211,8 @@ def main() -> None:
         lines.append(
             f"**Implication for the DiD analysis.** A structural kink in "
             f"basket density at the cutoff does not invalidate the DiD "
-            f"identification per se - the DiD compares on-time-delivery "
-            f"rates at fixed cell grain, not basket-density gradients. "
+            f"identification per se, since the DiD compares on-time-delivery "
+            f"rates at fixed cell grain rather than basket-density gradients. "
             f"But it does mean an RDD identification strategy at the same "
             f"cutoff would be problematic (RDD assumes the density is "
             f"continuous through the threshold; here it isn't). The DiD "
@@ -221,9 +221,9 @@ def main() -> None:
         )
     else:
         lines.append(
-            f"**Result: NO DISCONTINUITY DETECTED** (Z = {z_above:+.2f}, "
+            f"**Result: no discontinuity detected** (Z = {z_above:+.2f}, "
             f"|Z| < 1.96). The observed bin counts around R$ {THRESHOLD:.0f} "
-            f"are consistent with a smooth density - exactly what we "
+            f"are consistent with a smooth density, which is what we "
             f"expect, since the R$ 150 threshold didn't exist when the "
             f"data was generated. The DiD policy effect is not "
             f"contaminated by threshold-bunching in the historical panel."
@@ -236,7 +236,7 @@ def main() -> None:
         "post-deployment subtotal distribution would almost certainly "
         "show a spike just above R$ 150 as customers pad their carts. "
         "The conditional-spend lift estimated from a real deployment would "
-        "therefore be inflated by the bunching dynamic - the DiD posterior "
+        "therefore be inflated by the bunching dynamic. The DiD posterior "
         "from this static analysis is an *underestimate* of what a real "
         "deployment would observe, and a *correct estimate* of what the "
         "true policy effect on naturally-occurring large baskets is."

@@ -27,9 +27,9 @@ from src.paths import DUCKDB_DIR, FIGURES_DIR
 
 warnings.filterwarnings("ignore")
 
-# Width: 11 inches. Height: 0.30 inches per category plus 2.5-inch base for
-# title and margins. With 73 categories this gives a 24-inch tall figure -
-# tall, but every label is readable. At 140 dpi the PNG is ~3300 px tall
+# Width: 11 inches. Height: 0.30 inches per category plus a 2.5-inch base
+# for title and margins. With 73 categories that gives a 24-inch tall figure:
+# tall, but every label is readable. At 140 dpi the PNG is ~3300 px tall,
 # which renders cleanly in GitHub previews and in the report.
 WIDTH = 11.0
 HEIGHT_PER_CAT = 0.30
@@ -82,10 +82,10 @@ def main() -> None:
          "Per-category conditional log-spend treatment effect (naive)",
          "revenue_delta_C_forest.png"),
         (DUCKDB_DIR / "revenue_did_idata.nc", "delta_b_C",
-         "Per-category POLICY effect on P(repeat) -- Stage 1 (DiD)",
+         "Per-category POLICY effect on P(repeat), Stage 1 (DiD)",
          "revenue_did_delta_b_C_forest.png"),
         (DUCKDB_DIR / "revenue_did_idata.nc", "delta_l_C",
-         "Per-category POLICY effect on log(spend|repeat) -- Stage 2 (DiD)",
+         "Per-category POLICY effect on log(spend|repeat), Stage 2 (DiD)",
          "revenue_did_delta_l_C_forest.png"),
         (DUCKDB_DIR / "review_idata.nc", "tau_C",
          "Per-category treatment effect on review score (naive, cum-logit)",

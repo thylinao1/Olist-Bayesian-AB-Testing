@@ -1,6 +1,6 @@
 # Cost-benefit envelope (rough)
 
-**This is a back-of-envelope sanity check, not a forecast.** It uses the posterior means from the DiD-corrected revenue model and the actual freight statistics on Olist to size the policy's incremental revenue vs subsidy cost. Margin assumptions are explicit and conservative.
+**This is a back-of-envelope sanity check rather than a forecast.** It uses the posterior means from the DiD-corrected revenue model and the actual freight statistics on Olist to size the policy's incremental revenue vs subsidy cost. Margin assumptions are explicit and conservative.
 
 ## Inputs
 
@@ -28,6 +28,6 @@
 
 The envelope produces a *negative net envelope*: at the assumed 20% contribution margin, the freight subsidy cost is larger than the incremental margin from lifted retention and conditional spend.
 
-**Sensitivity.** Holding everything else fixed, the break-even contribution margin is approximately `subsidy_cost / incremental_GMV = 2084.2%`. If actual margins on the incremental categories are above this threshold the policy pays for itself; if below it does not. The DiD spend multiplier carries wide uncertainty (94% HDI on the log scale crosses zero), so this envelope should be treated as a midpoint estimate, not a prediction.
+**Sensitivity.** Holding everything else fixed, the break-even contribution margin is approximately `subsidy_cost / incremental_GMV = 2084.2%`. If actual margins on the incremental categories are above this threshold the policy pays for itself; if below it does not. The DiD spend multiplier carries wide uncertainty (94% HDI on the log scale crosses zero), so this envelope should be treated as a midpoint estimate rather than a prediction.
 
 **What the envelope omits.** Order-acquisition cost savings from retained customers (not modelled), lifetime-value impact beyond the 180-day window, review-score-driven brand effects (review drops ~0.13 stars), seller-side price responses (would inflate observed lift), and the bunching-induced basket-padding dynamic that the static data cannot capture. All are listed in §7 Limitations of the main report.

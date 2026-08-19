@@ -7,7 +7,7 @@ eligible-subtotal) against everything-else as the control. Under that
 construction, three things differ between the two groups:
 
     1. The policy itself.
-    2. Basket size - eligible orders are *defined* as large baskets, which
+    2. Basket size. Eligible orders are *defined* as large baskets, which
        are structurally slower to ship. (DAG: T -> B -> D -> Y mediator.)
     3. A common time trend across the whole marketplace.
 
@@ -25,7 +25,7 @@ DiD identifies the +1.3 pp policy effect under a parallel-trends assumption.
 Hierarchical version
 --------------------
 This module fits a Bayesian DiD with the same partial-pooling structure as
-the original binomial model. The headline parameter is `delta_C[c]` - the
+the original binomial model. The headline parameter is `delta_C[c]`, the
 policy effect *per product category*, with a global mean `delta_bar` and
 across-category variance `sigma_delta`.
 
@@ -59,8 +59,8 @@ class BinomialDiDData:
     """Tensor inputs for the Bayesian DiD model."""
     n_trials:        np.ndarray   # (N,)
     n_successes:     np.ndarray   # (N,)
-    eligible:        np.ndarray   # (N,) {0,1}  -- subtotal >= R$ 150
-    post:            np.ndarray   # (N,) {0,1}  -- purchase_week >= W*
+    eligible:        np.ndarray   # (N,) {0,1}: subtotal >= R$ 150
+    post:            np.ndarray   # (N,) {0,1}: purchase_week >= W*
     category_idx:    np.ndarray   # (N,)
     seller_tier_idx: np.ndarray   # (N,)
     state_idx:       np.ndarray   # (N,)

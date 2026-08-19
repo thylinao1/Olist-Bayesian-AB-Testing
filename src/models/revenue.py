@@ -21,8 +21,8 @@ equivalent to a hurdle distribution:
     p(y_i = 0)        = 1 - theta_i
     p(y_i = y | y>0)  = theta_i * LogNormalPDF(y | mu_i, sigma)
 
-Linear models - hierarchical priors over the first-order product category
-. The treatment indicator T enters BOTH stages because the policy
+Linear models, with hierarchical priors over the first-order product
+category. The treatment indicator T enters BOTH stages because the policy
 plausibly affects both 'do they return' and 'how much do they spend'.
 
     logit(theta_i) = alpha_C[c]  + tau_C[c] * T_i
@@ -150,7 +150,7 @@ def build_hurdle_lognormal(d: RevenueModelData) -> pm.Model:
         treatment      = pm.Data("treatment",      d.treatment,            dims="obs")
         log_first_sub  = pm.Data("log_first_sub",  d.log_first_subtotal,   dims="obs")
 
-        # ---- STAGE 1 -- Bernoulli: did the customer return ----------------
+        # ---- STAGE 1: Bernoulli, did the customer return ------------------
         alpha_bar = pm.Normal("alpha_bar", 0.0, 1.0)
         tau_bar   = pm.Normal("tau_bar",   0.0, 1.0)
         sigma_alpha = pm.Exponential("sigma_alpha", 1.0)
@@ -169,7 +169,7 @@ def build_hurdle_lognormal(d: RevenueModelData) -> pm.Model:
 
         pm.Bernoulli("y_repeat", p=theta, observed=d.has_repeat, dims="obs")
 
-        # ---- STAGE 2 -- LogNormal: how much they spent if they returned --
+        # ---- STAGE 2: LogNormal, how much they spent if they returned ----
         # We slice the model to only the positive-revenue rows.
         pos_cat_idx        = d.category_idx[pos_idx]
         pos_treatment      = d.treatment[pos_idx]

@@ -5,7 +5,7 @@ Builds the DuckDB warehouse layer-by-layer from the raw Olist CSVs:
     raw CSVs  ->  bronze  ->  silver  ->  gold  ->  analytics
 
 Each layer is defined by a directory of .sql files in `sql/<layer>/`. Files are
-executed in alphabetical order. Bronze additionally needs to know where the
+executed in alphabetical order. Bronze also needs to know where the
 raw CSVs live, so the loader templates {raw_dir} into the SQL.
 
 Usage

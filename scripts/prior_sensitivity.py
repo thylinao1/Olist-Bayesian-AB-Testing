@@ -13,17 +13,17 @@ on the across-category variance and check that delta_bar barely moves.
 
 This script re-fits the binomial DiD three times:
 
-    1. Exponential(1)     -- the headline run, re-done here for an
-                             apples-to-apples comparison
-    2. Exponential(2)     -- a tighter prior (E[sigma_delta] = 0.5
-                             instead of 1.0), pulls the partial-pooling
-                             scale harder toward zero
-    3. HalfNormal(1)      -- a different family entirely, broadly
-                             comparable mean but heavier tail behaviour
+    1. Exponential(1)     the headline run, re-done here for an
+                          apples-to-apples comparison
+    2. Exponential(2)     a tighter prior (E[sigma_delta] = 0.5 instead
+                          of 1.0), pulls the partial-pooling scale
+                          harder toward zero
+    3. HalfNormal(1)      a different family entirely, broadly
+                          comparable mean but heavier tail behaviour
 
 Output:
-    reports/prior_sensitivity.md  -- markdown table for the final report
-    stdout                        -- a summary as the script runs
+    reports/prior_sensitivity.md   markdown table for the final report
+    stdout                         a summary as the script runs
 
 Usage:
     # Run all three priors in one shot and write the markdown table:
@@ -220,9 +220,9 @@ def _build_writeup(results: list[dict]) -> str:
         f"The spread in `delta_bar` across the three runs is "
         f"{spread:+.4f} logit (~{spread*100*0.11:.2f} pp on the "
         f"probability scale at the ~89% baseline). The headline "
-        f"+1.5 pp on-time policy effect is robust to the hyperprior "
-        f"choice - the posterior is dominated by the 97k-order "
-        f"likelihood, not by the prior."
+        f"+1.5 pp on-time policy effect does not depend on the hyperprior "
+        f"choice; the posterior is dominated by the 97k-order "
+        f"likelihood rather than by the prior."
     )
     lines.append("")
     return "\n".join(lines)

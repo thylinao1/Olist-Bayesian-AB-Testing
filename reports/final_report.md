@@ -5,15 +5,15 @@
 
 ---
 
-## TL;DR
+## Summary
 
-A real e-commerce dataset, a synthetic intervention defined transparently from existing columns, a medallion SQL feature pipeline on DuckDB, and a hierarchical Bayesian model stack that recovers per-category treatment effects the standard flat A/B baselines pool away.
+The dataset is real. The intervention is synthetic and built from columns that already exist. The feature pipeline is a medallion SQL stack on DuckDB, and the models are hierarchical Bayesian fits that recover per-category treatment effects the flat A/B baselines pool away.
 
-The headline question: **does a hypothetical free-shipping-above-R$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer-review scores - and does the answer depend on which product category we are asking about?**
+The question the report answers: would a hypothetical free-shipping-above-R$ 150 policy lift on-time delivery, repeat-purchase revenue, and customer-review scores, and does the answer depend on which product category we are asking about?
 
 Three hierarchical Bayesian models give a posterior over the answer. Each runs on the same 97k-order panel, conditional on the same DAG-derived adjustment set. They are compared head-to-head with the classical baselines a marketplace team would normally use (two-proportion z, Welch t, Mann-Whitney U, chi-square).
 
-> **Methodological update - important.** The naive binomial specification
+> **Methodological update.** The naive binomial specification
 > compares `treated = (post-cutover AND subtotal ≥ R$ 150)` against
 > *everything else* as control. That conflates the policy with two other
 > things: large baskets being structurally slower to ship, and a common
@@ -22,11 +22,11 @@ Three hierarchical Bayesian models give a posterior over the answer. Each runs o
 > β_eligible = -0.19 logit (basket-size structural effect),
 > β_post = -0.34 logit (common time trend),
 > **δ̅ = +0.17 logit, ≈ +1.5 pp policy effect** (94% HDI +0.05, +0.29;
-> P(δ̅ > 0) = 99.7%). The frequentist DiD-logistic gives +1.35 pp, p=0.013
-> - methods triangulate. **The naive specification got the sign wrong**:
-> the headline -2 pp was -2 pp basket-size, -2 pp time trend, +1.5 pp real
-> policy effect. The headline numbers below show both; the DiD numbers
-> are the ones to quote.
+> P(δ̅ > 0) = 99.7%). The frequentist DiD-logistic gives +1.35 pp, p=0.013,
+> so the two methods triangulate. **The naive specification got the sign
+> wrong**: the headline -2 pp was -2 pp basket-size, -2 pp time trend, and
+> +1.5 pp real policy effect. The headline numbers below show both; the
+> DiD numbers are the ones to quote.
 
 ### Headline numbers
 
@@ -35,30 +35,33 @@ Three hierarchical Bayesian models give a posterior over the answer. Each runs o
 | On-time delivery | -2 pp (-3 to -1) | **+1.5 pp** (δ̅ = +0.169, 94% HDI +0.048, +0.289, P>0 = 99.7%) | Sign flipped: -2 pp basket-size + -2 pp time trend masked +1.5 pp real lift |
 | P(customer returns within 180 d) | -0.5 pp (logit τ̅ = -0.24) | **null** (δ̅\_b = +0.065, 94% HDI -0.14, +0.26, P>0 = 73%) | Was a 180-day observation-window censoring artifact (β_post = -0.47) |
 | Conditional spend if repeat | +13.5% (logit δ̅ = +0.13) | **+10%** (δ̅\_l = +0.093, ×1.097, 94% HDI -0.07, +0.25, P>0 = 86%) | Partially confounded with basket-size; shrunk but same direction |
-| Review score | -0.16 cum-logit (-0.25 to -0.07) | **-0.17 cum-logit** (-0.29 to -0.06, P>0 = 0.3%) | Robust real effect - almost no confounding |
+| Review score | -0.16 cum-logit (-0.25 to -0.07) | **-0.17 cum-logit** (-0.29 to -0.06, P>0 = 0.3%) | Real effect, almost no confounding |
 
-### The business punchline
+### Sizing the policy in R$
 
-Sizing the policy in R$ using the actual freight data and the DiD posterior means: **the freight subsidy cost is ~R$ 457K against ~R$ 4.4K of incremental contribution margin** at a conservative 20% rate. The policy loses about R$ 452K net at this design point - even though the per-customer Welch result was a positive +R$ 1.90. Most analyses stop at the +R$ 1.90; doing the full envelope kills the policy at this design point, which is *the right answer* given the posterior. Full numbers in §7.
+Using the observed freight data and the DiD posterior means, the freight subsidy costs about R$ 457K against about R$ 4.4K of incremental contribution margin at a conservative 20% rate. The policy loses roughly R$ 452K net at this design point, even though the per-customer Welch result was a positive +R$ 1.90. The per-customer figure on its own is misleading, because the subsidy is paid on every eligible order rather than only on the incremental ones. Full numbers in §7.
 
 ### The integrated narrative (DiD-corrected, all four outcomes)
 
-**Two of the four naive Bayesian findings were misleading, one was misleading in magnitude, and one was correct.**
+Two of the four naive Bayesian findings were misleading, one was misleading in magnitude, and one was correct.
 
-- **On-time delivery**: the policy is a **mild positive (+1.5 pp lift)**. The naive analysis reported -2 pp because it conflated the policy with -2 pp of basket-size structural slowness and -2 pp of a marketplace-wide time trend. The DiD recovers a positive policy effect with 99.7% posterior probability.
-- **Retention**: the naive -0.5 pp drop was **almost entirely an observation-window artifact** - customers who placed their first order late in the panel had less than 180 days of follow-up to actually repeat-purchase. The DiD picks this up as a strong `β_post = -0.47` and finds the policy itself is **null on retention** (P(>0) = 73%, HDI crosses zero).
-- **Conditional spend if customer returns**: the naive +13.5% was partially absorbing a basket-size-of-eligible effect. The DiD-corrected lift is **+10% (×1.097)**, modest, with 86% posterior probability of being positive but the HDI just crosses zero.
-- **Review score**: the only outcome where almost no confounding was present. The DiD estimate (-0.17 cum-logit, P(<0) = 99.7%) is essentially identical to the naive (-0.16) and the classical baseline (-0.13 mean shift, χ² p<0.0001). Customers in the eligible stratum rate the policy *less* favourably. Note this is *not* explained by slower delivery - the DiD finds the policy *lifts* on-time by +1.5 pp. A more plausible mechanism is that the heavier, larger baskets the policy makes attractive carry higher implicit expectations (longer baseline transit, more parts, more things that can go wrong), and the +1.5 pp on-time lift is too small to offset that. The structural slowness of large baskets is a baseline attribute of the stratum, not a policy effect.
+On on-time delivery the policy is a mild positive, a lift of about 1.5 pp. The naive analysis reported -2 pp because it conflated the policy with -2 pp of basket-size structural slowness and -2 pp of a marketplace-wide time trend. The DiD recovers a positive policy effect with 99.7% posterior probability.
 
-**The corrected go/no-go**: the policy modestly **lifts on-time delivery** and gives a **plausible if uncertain conditional-spend lift**, **does not actually hurt retention** (that was a censoring artifact), and **does cost about 0.13 stars in review score**. A flat A/B test would have reported a -2 pp on-time drop and a -0.5 pp retention drop and the recommendation would have been to kill the policy. The DiD-corrected analysis says the opposite - proceed, monitor reviews, and target categories where δ_C[c] is most positive in the per-category forest plot.
+On retention, the naive -0.5 pp drop was almost entirely an observation-window artifact. Customers who placed their first order late in the panel had less than 180 days of follow-up in which to repeat-purchase. The DiD picks this up as a strong `β_post = -0.47` and finds the policy itself is null on retention (P(>0) = 73%, HDI crosses zero).
+
+For conditional spend among customers who return, the naive +13.5% was partially absorbing a basket-size-of-eligible effect. The DiD-corrected lift is +10% (×1.097): modest, with 86% posterior probability of being positive, and an HDI that just crosses zero.
+
+Review score is the only outcome where almost no confounding was present. The DiD estimate (-0.17 cum-logit, P(<0) = 99.7%) is essentially identical to the naive (-0.16) and to the classical baseline (-0.13 mean shift, χ² p<0.0001). Customers in the eligible stratum rate the policy *less* favourably. Slower delivery does not explain that, since the DiD finds the policy *lifts* on-time by +1.5 pp. A more plausible mechanism is that the heavier, larger baskets the policy makes attractive carry higher implicit expectations (longer baseline transit, more parts, more things that can go wrong), and a +1.5 pp on-time lift is too small to offset them. The structural slowness of large baskets is a baseline attribute of the stratum, not a policy effect.
+
+Putting that together: the policy modestly lifts on-time delivery, gives a plausible if uncertain conditional-spend lift, leaves retention alone (the apparent drop was a censoring artifact), and costs about 0.13 stars in review score. A flat A/B test would have reported a -2 pp on-time drop plus a -0.5 pp retention drop, and the recommendation would have been to kill the policy. The DiD-corrected analysis points the other way: proceed, monitor reviews, and target the categories where δ_C[c] is most positive in the per-category forest plot.
 
 ---
 
 ## 1. Why this dataset and this framing
 
-Olist's public dataset has the rare combination of being **real, messy, and relational**: 99,441 orders across 9 tables (orders, items, payments, reviews, customers, sellers, products, geolocation, category translation), with 1.5M order-line records and 1M geolocation points. It supports SQL that looks like the SQL marketplace teams actually run on a Tuesday afternoon - not single-table `SELECT … WHERE … GROUP BY`.
+Olist's public dataset has the rare combination of being **real, messy, and relational**: 99,441 orders across 9 tables (orders, items, payments, reviews, customers, sellers, products, geolocation, category translation), with 1.5M order-line records and 1M geolocation points. It supports the kind of SQL marketplace teams actually run on a Tuesday afternoon, well past single-table `SELECT … WHERE … GROUP BY`.
 
-There is no real RCT in the data. To stay honest, the project is framed as *the inferential machinery that would be used if Olist ran this experiment* - the treatment is synthetic, but the exposure variable (`purchase_week >= cutover_week AND items_subtotal >= R$ 150`) is constructed from real columns and the modelling pipeline is the one that would be deployed if the assignment were real.
+There is no real RCT in the data. To stay honest, the project is framed as *the inferential machinery that would be used if Olist ran this experiment*. The treatment is synthetic, but the exposure variable (`purchase_week >= cutover_week AND items_subtotal >= R$ 150`) is constructed from real columns, and the modelling pipeline is the one that would be deployed if the assignment were real.
 
 ---
 
@@ -100,11 +103,11 @@ python scripts/run_baselines.py
 
 **Treatment**: `T = 1` if order placed at week ≥ W\* AND items-subtotal ≥ R$ 150. W\* is set to the median purchase week so treated and control halves are comparable in size. The full justification is in [`docs/01_treatment_and_dag.md`](../docs/01_treatment_and_dag.md).
 
-**A note on the cutover choice.** W\* = median purchase week is a *data-derived* cutoff, which raises the standard concern about data-dependent specifications: a researcher who scans cutoffs and reports the one that maximises a test statistic is effectively running a hidden multiple-comparison procedure. That is not what is happening here. The median is fixed in `src/features.py` as a one-line rule (`np.median(purchase_week)`), set before any model was fit, and is documented in the DAG note as the choice that keeps the two halves of the panel comparably sized. The parallel-trends test in §9 is run on the resulting pre-cutover window and is itself a falsification check on whether the chosen cutover separates an honest pre-period from the treated post-period. The alternative - a calendar date picked from outside the data - would have been cleaner but would have produced two grossly unbalanced halves on this panel. The choice is documented and held fixed; it is not the result of a search.
+**A note on the cutover choice.** W\* = median purchase week is a *data-derived* cutoff, which raises the standard concern about data-dependent specifications: a researcher who scans cutoffs and reports the one that maximises a test statistic is effectively running a hidden multiple-comparison procedure. That is not what is happening here. The median is fixed in `src/features.py` as a one-line rule (`np.median(purchase_week)`), set before any model was fit, and is documented in the DAG note as the choice that keeps the two halves of the panel comparably sized. The parallel-trends test in §9 is run on the resulting pre-cutover window and is itself a falsification check on whether the chosen cutover separates an honest pre-period from the treated post-period. The alternative, a calendar date picked from outside the data, would have been cleaner but would have produced two grossly unbalanced halves on this panel. The choice is documented and held fixed; it is not the result of a search.
 
-The DAG is encoded in [`src/dag.py`](../src/dag.py) and rendered to [`reports/figures/dag.png`](figures/dag.png). The four-elemental-confounds framework (fork, pipe, collider, descendant) gives the **adjustment set `{C, S, G, M}`**: product category, seller volume tier, customer state, calendar month. Variables downstream of T - freight charged, basket size, delivery days, whether a review was left - are deliberately *not* conditioned on, because conditioning on a mediator introduces post-treatment bias. Conditioning on the review (a collider with both T and Y as parents) would open a non-causal path.
+The DAG is encoded in [`src/dag.py`](../src/dag.py) and rendered to [`reports/figures/dag.png`](figures/dag.png). The four-elemental-confounds framework (fork, pipe, collider, descendant) gives the **adjustment set `{C, S, G, M}`**: product category, seller volume tier, customer state, calendar month. Variables downstream of T (freight charged, basket size, delivery days, whether a review was left) are deliberately *not* conditioned on, because conditioning on a mediator introduces post-treatment bias. Conditioning on the review (a collider with both T and Y as parents) would open a non-causal path.
 
-The conditional independencies the DAG implies are tested in `notebooks/02_dag_treatment.ipynb` - a wrong DAG can be falsified even though a correct one cannot be confirmed.
+The conditional independencies the DAG implies are tested in `notebooks/02_dag_treatment.ipynb`; a wrong DAG can be falsified even though a correct one cannot be confirmed.
 
 ---
 
@@ -123,13 +126,13 @@ Each model uses the same hierarchical pattern (varying intercept and varying tre
 
 Why each is defensible:
 
-- **Binomial DiD** drops month because `post` is a binary partition of the time axis and would be collinear with monthly fixed effects in a single linear predictor. The `β_post` coefficient absorbs the seasonal time trend across the cutover.
-- **Revenue models** are at the *per-customer* grain. The Stage-2 LogNormal arm of the hurdle conditions on `has_repeat = 1`, and only 2.3% of customers return within 180 days - so the Stage-2 sample is roughly 2,000 rows. Spread that across 73 categories × 27 states × 24 months × 4 seller tiers and the cell counts for `gamma_G[g]`, `delta_M[m]`, and `beta_S[s]` collapse to single digits. Including those hierarchical groupings on a sample this thin pushes the partial-pooling priors hard, so they shrink to ~zero and waste posterior mass on parameters the data cannot identify. `log_first_subtotal` is retained as the meaningful continuous adjuster, the category `C` retains the strong hierarchical signal, and `S/G/M` are dropped on sparsity grounds. The Stage-1 Bernoulli arm uses the full panel so this concern does not apply there.
-- **Review DiD** drops month for the same reason as binomial DiD, and drops customer state because `gamma_G` had ESS ~50 in earlier review fits - the empirical state-level variation in 1-5 review scores is small relative to the noise floor of an ordered-logit fit on 30k rows.
+- The binomial DiD drops month because `post` is a binary partition of the time axis and would be collinear with monthly fixed effects in a single linear predictor. The `β_post` coefficient absorbs the seasonal time trend across the cutover.
+- The revenue models are at the *per-customer* grain. The Stage-2 LogNormal arm of the hurdle conditions on `has_repeat = 1`, and only 2.3% of customers return within 180 days, so the Stage-2 sample is roughly 2,000 rows. Spread that across 73 categories × 27 states × 24 months × 4 seller tiers and the cell counts for `gamma_G[g]`, `delta_M[m]`, and `beta_S[s]` collapse to single digits. Including those hierarchical groupings on a sample this thin pushes the partial-pooling priors hard, so they shrink to ~zero and waste posterior mass on parameters the data cannot identify. `log_first_subtotal` is retained as the meaningful continuous adjuster, the category `C` retains the strong hierarchical signal, and `S/G/M` are dropped on sparsity grounds. The Stage-1 Bernoulli arm uses the full panel so this concern does not apply there.
+- The review DiD drops month for the same reason as the binomial DiD, and drops customer state because `gamma_G` had ESS around 50 in earlier review fits: the empirical state-level variation in 1-5 review scores is small relative to the noise floor of an ordered-logit fit on 30k rows.
 
-This is a real divergence from the DAG's full `{C, S, G, M}` adjustment set. The justification is data-driven (Stage-2 sparsity, low review-state ESS) rather than causal - under the DAG the arrows S/G/M → T are weak in this synthetic intervention, so the omitted-confounder bias from dropping them should be small. A robustness extension would re-fit each model with the full adjustment set and check whether `delta_bar` shifts materially; the current expectation is that it would not.
+This is a real divergence from the DAG's full `{C, S, G, M}` adjustment set. The justification is data-driven (Stage-2 sparsity, low review-state ESS) rather than causal. Under the DAG the arrows S/G/M → T are weak in this synthetic intervention, so the omitted-confounder bias from dropping them should be small. A sensitivity extension would re-fit each model with the full adjustment set and check whether `delta_bar` shifts materially; the current expectation is that it would not.
 
-### 4.1 Hierarchical Binomial - on-time delivery
+### 4.1 Hierarchical Binomial: on-time delivery
 
 ```
 n_on_time_i   ~ Binomial(n_orders_i, p_i)
@@ -142,22 +145,22 @@ logit(p_i)    = α_C[c] + β_S[s] + γ_G[g] + δ_M[m] + τ_C[c]·T_i
 σ_·         ~ Exponential(1)
 ```
 
-**Why on-time, not "delivered"?** The base rate of `is_delivered` is 97% - too saturated to find treatment lift. `is_on_time` is 89% with real cross-category variance and a defensible mechanism (free-shipping eligibility correlates with seller logistics quality).
+**Choice of outcome.** The base rate of `is_delivered` is 97%, too saturated for treatment lift to show up. `is_on_time` is 89% with real cross-category variance and a defensible mechanism (free-shipping eligibility correlates with seller logistics quality).
 
-**The headline output**: not a single τ, but a posterior over (number-of-categories) treatment effects, plus a global mean τ̅ and an across-category variance σ_τ. A flat A/B test gives one number; this gives a distribution and a way to ask which categories the policy actually moves.
+**The headline output** is a posterior over (number-of-categories) treatment effects, plus a global mean τ̅ and an across-category variance σ_τ. A flat A/B test gives one number; this gives a distribution and a way to ask which categories the policy actually moves.
 
 **Result** (4 chains × 1500 draws on `nutpie`, 107s wall time):
 
 - Global treatment effect τ̅ (logit scale): **mean = -0.197, 94% HDI = (-0.305, -0.095)**
-- P(τ̅ > 0) = **0.1%** - i.e., 99.9% posterior probability the effect is *negative*
+- P(τ̅ > 0) = **0.1%**, i.e. 99.9% posterior probability the effect is *negative*
 - Marginal probability-scale interpretation: roughly a **-2 percentage point shift in on-time delivery rate** (from ~89.9% baseline to ~87.8% under treatment)
-- $\sigma_\tau = 0.190,\;\; \text{94\\% HDI } (0.081,\; 0.315)$ - there is real cross-category variation in how strongly the policy moves the on-time rate
+- $\sigma_\tau = 0.190,\;\; \text{94\\% HDI } (0.081,\; 0.315)$. There is real cross-category variation in how strongly the policy moves the on-time rate
 
 **Cross-validation against the classical baseline** (run by `scripts/run_baselines.py`):
-- Two-proportion z-test: 87.82% (treated) vs 90.18% (control) → diff **-2.36 pp**, 95% CI (-2.97, -1.74), p < 0.0001
+- Two-proportion z-test: 87.82% (treated) vs 90.18% (control) gives a diff of **-2.36 pp**, 95% CI (-2.97, -1.74), p < 0.0001
 - The Bayesian and frequentist analyses converge on the same direction and roughly the same magnitude. The Bayesian framework adds the across-category σ_τ which the z-test cannot give.
 
-**Causal caveat that this naive specification has - and how the DiD design fixes it.** By construction `treatment = (purchase_week ≥ W*) AND (items_subtotal ≥ R$ 150)`. Under that definition the "control" group is *everything else*: pre-cutover orders of any size, plus post-cutover small baskets. So treated and control differ on three dimensions at once - the policy, basket size, and time period. The -2 pp result above is therefore a sum of all three.
+**The causal caveat in this naive specification, and how the DiD design fixes it.** By construction `treatment = (purchase_week ≥ W*) AND (items_subtotal ≥ R$ 150)`. Under that definition the "control" group is *everything else*: pre-cutover orders of any size, plus post-cutover small baskets. So treated and control differ on three dimensions at once: the policy, basket size, and time period. The -2 pp result above is therefore a sum of all three.
 
 The within-stratum 2x2 DiD breaks them apart:
 
@@ -181,7 +184,7 @@ delta (DiD)  = +0.123   →  POLICY EFFECT - 95% CI (+0.026, +0.221), p = 0.013
 
 The full hierarchical Bayesian DiD model is in `src/models/binomial_did.py`. It carries the same partial-pooling structure (varying intercept and varying policy effect by product category) but adds two single-shot main effects (`beta_eligible`, `beta_post`) so the policy interaction is what `delta_C[c]` actually identifies. Run with `python scripts/fit_binomial_did.py --use-nutpie`.
 
-**Bayesian DiD result** (4 chains × 1500 draws, 47 s on `nutpie` - faster than the 107 s naive fit despite carrying two extra parameters; the explanation is geometry: the DiD design forces β_eligible and β_post to absorb variance that was previously diffuse across τ_C[c], so the per-iteration gradient is less ill-conditioned and the sampler takes longer effective steps):
+**Bayesian DiD result** (4 chains × 1500 draws, 47 s on `nutpie`, faster than the 107 s naive fit despite carrying two extra parameters; the explanation is geometry: the DiD design forces β_eligible and β_post to absorb variance that was previously diffuse across τ_C[c], so the per-iteration gradient is less ill-conditioned and the sampler takes longer effective steps):
 
 ```
 beta_eligible = -0.194  (94% HDI -0.262, -0.127)   basket-size structural effect
@@ -197,11 +200,11 @@ Translated to the probability scale at the ~89% baseline, the policy effect is *
 
 Reading the forest plot: each row is a product category, the dot is the posterior mean, the line is the 94% HDI. Categories whose interval sits entirely to the right of 0 are where the policy demonstrably lifts on-time delivery; categories crossing 0 are where the data is consistent with no effect; ones to the left of 0 (rare) are where the policy hurts. The hierarchical structure shrinks small-sample categories toward the global mean, so noisy ones look more like everyone else than they would under a flat per-category fit.
 
-**Posterior predictive check.** Re-simulating the data from the posterior produces an on-time rate distribution centred on the observed 89.88%, with the simulated rate falling within ±0.01 pp of the empirical value - confirming the model is calibrated and not systematically over- or under-predicting at the aggregate level.
+**Posterior predictive check.** Re-simulating the data from the posterior produces an on-time rate distribution centred on the observed 89.88%, with the simulated rate falling within ±0.01 pp of the empirical value. The model is calibrated and does not systematically over- or under-predict at the aggregate level.
 
-![Posterior predictive check - Binomial DiD on-time delivery](figures/ppc_binomial_did.png)
+![Posterior predictive check for the Binomial DiD on-time model](figures/ppc_binomial_did.png)
 
-### 4.2 Hurdle-LogNormal - repeat-purchase revenue
+### 4.2 Hurdle-LogNormal: repeat-purchase revenue
 
 A two-stage mixture in the spirit of the canonical zero-inflated Poisson, but adapted for continuous revenue:
 
@@ -217,16 +220,16 @@ Stage 1 = **did the customer come back at all** within 180 days?  Stage 2 = **ho
 
 The framing is honest: every observed Olist customer has at least one positive order by construction, so we can't have ZI at order grain. Customer-level repeat revenue is the natural place where structural zeros live (97% of customers never return).
 
-**Data note - why only 2.3% of customers come back.** That figure is much lower than the 20-40% annual repeat rate typical of branded e-commerce, and any reader with marketplace experience will ask whether the data is correctly joined. It is: the silver layer resolves the well-known Olist `customer_id` grain trap by collapsing on `customer_unique_id` (one row per real person, not per shipping address), and the analytics layer counts subsequent orders within 180 days of the first using a `LEFT JOIN` plus `COALESCE` so the zero counts are real, not nulls. The 2.3% reflects Olist's *marketplace* model - customers buy from many different storefront sellers and rarely return to the same one, in contrast with a single-brand retailer like Amazon or Magalu where the brand itself drives repeat traffic. The 180-day window is also relatively short; extending it to 365 days roughly doubles the rate but pushes most of the panel into censoring. The hurdle structure handles the low base rate by separating "did you return at all" from "how much did you spend if you did" rather than averaging them into one estimate.
+**Data note on why only 2.3% of customers come back.** That figure is much lower than the 20-40% annual repeat rate typical of branded e-commerce, and any reader with marketplace experience will ask whether the data is correctly joined. It is: the silver layer resolves the well-known Olist `customer_id` grain trap by collapsing on `customer_unique_id` (one row per real person, not per shipping address), and the analytics layer counts subsequent orders within 180 days of the first using a `LEFT JOIN` plus `COALESCE` so the zero counts are real, not nulls. The 2.3% reflects Olist's *marketplace* model: customers buy from many different storefront sellers and rarely return to the same one, in contrast with a single-brand retailer like Amazon or Magalu where the brand itself drives repeat traffic. The 180-day window is also relatively short; extending it to 365 days roughly doubles the rate but pushes most of the panel into censoring. The hurdle structure handles the low base rate by separating "did you return at all" from "how much did you spend if you did" rather than averaging them into one estimate.
 
 **Result** (4 chains × 1500 draws, ADVI init, 388s wall time):
 
-- **Stage 1 - P(repeat) treatment effect**: τ̅ = **-0.243** (logit), 94% HDI **(-0.392, -0.097)**, P(τ̅ > 0) = **0.1%**.
-  - Baseline α_bar = -3.798 → P(repeat) ≈ 2.2% in control, **dropping to ≈ 1.7% under treatment** - a ~0.5 pp absolute drop in retention.
-- **Stage 2 - log-spend | repeat treatment effect**: δ̅ = **+0.127**, 94% HDI **(-0.012, +0.259)**, P(δ̅ > 0) = **95.9%**.
-  - Multiplicative effect on conditional revenue: **× 1.135** - treated returners spend ~13.5% more than control returners.
-- **Adjusting covariate**: γ_log_first_sub = +0.362 (94% HDI 0.327-0.400) - first-order subtotal is a strong positive predictor of downstream spend, as expected.
-- **Diagnostics**: 0 divergences across all 4 chains, R̂ = 1.00 across the board, ESS_bulk in the thousands. Cleanest fit of the three models.
+- Stage 1, the P(repeat) treatment effect: τ̅ = **-0.243** (logit), 94% HDI **(-0.392, -0.097)**, P(τ̅ > 0) = **0.1%**.
+  - Baseline α_bar = -3.798 → P(repeat) ≈ 2.2% in control, dropping to ≈ 1.7% under treatment, about a 0.5 pp absolute drop in retention.
+- Stage 2, the log-spend-given-repeat treatment effect: δ̅ = **+0.127**, 94% HDI **(-0.012, +0.259)**, P(δ̅ > 0) = **95.9%**.
+  - Multiplicative effect on conditional revenue: **× 1.135**, so treated returners spend about 13.5% more than control returners.
+- Adjusting covariate: γ_log_first_sub = +0.362 (94% HDI 0.327-0.400). First-order subtotal is a strong positive predictor of downstream spend, as expected.
+- Diagnostics: 0 divergences across all 4 chains, R̂ = 1.00 across the board, ESS_bulk in the thousands. Cleanest fit of the three models.
 
 **Cross-validation against the classical baselines**:
 - Welch t on per-customer revenue: +R$ 1.90 (95% CI +0.44 to +3.37), p = 0.011.
@@ -246,27 +249,27 @@ Stage 2 (log conditional spend) decomposition:
   POLICY       delta_l_bar=+0.093  (94% HDI -0.07, +0.25, P>0 = 86%)   ×1.097 multiplier
 ```
 
-**The naive +13.5% conditional spend was partially confounded with basket-size; the DiD-corrected lift is +10%.** More importantly, **the naive -0.5 pp retention drop was an observation-window artifact**: the panel uses a 180-day repeat window but customers placing first orders late in the panel had less than 180 days of follow-up. The DiD picks this up as `beta_post = -0.47` and the policy itself is null on retention. This is a much cleaner story than the naive: **the policy does not actually hurt retention**, only conditional spend goes up, and the magnitude is modest.
+**The naive +13.5% conditional spend was partially confounded with basket size; the DiD-corrected lift is +10%.** The bigger correction is on retention: the naive -0.5 pp drop was an observation-window artifact, because the panel uses a 180-day repeat window and customers placing first orders late in the panel had less than 180 days of follow-up. The DiD picks this up as `beta_post = -0.47` and the policy itself is null on retention. That is a much cleaner story than the naive one. The policy leaves retention alone, only conditional spend goes up, and the magnitude is modest.
 
-![Per-category policy effect on P(repeat) - Stage 1 DiD](figures/revenue_did_delta_b_C_forest.png)
+![Per-category policy effect on P(repeat), Stage 1 DiD](figures/revenue_did_delta_b_C_forest.png)
 
-![Per-category policy effect on conditional repeat spend - Stage 2 DiD](figures/revenue_did_delta_l_C_forest.png)
+![Per-category policy effect on conditional repeat spend, Stage 2 DiD](figures/revenue_did_delta_l_C_forest.png)
 
-Stage-1 (P(repeat)) per-category posteriors are tightly clustered around zero with HDIs that mostly cross it, consistent with the null global finding. Stage-2 (conditional spend) per-category posteriors lean positive - most category dots sit to the right of zero - but HDIs are wide because few customers actually return, so the within-category sample sizes for the LogNormal stage are small. Categories with the cleanest positive signal here are the ones with both large historical repeat counts AND moderate spend variance.
+Stage-1 (P(repeat)) per-category posteriors are tightly clustered around zero with HDIs that mostly cross it, consistent with the null global finding. Stage-2 (conditional spend) per-category posteriors lean positive (most category dots sit to the right of zero) but the HDIs are wide because few customers actually return, so the within-category sample sizes for the LogNormal stage are small. Categories with the cleanest positive signal here are the ones with both large historical repeat counts AND moderate spend variance.
 
-**Selection on Stage 2 - what to keep in mind when reading the spend lift.** The Stage-2 LogNormal arm is fit only on customers with `has_repeat = 1`, which is itself influenced by the treatment (Stage-1 estimates a policy effect on the Bernoulli return indicator). Conditioning on a post-treatment variable to define the analysis sample can in principle distort the Stage-2 estimate, because the treated and control returners differ in their unobserved propensity to return. Two reasons this concern is small in practice here: (i) the Stage-1 policy effect on returning is statistically null (δ̅_b = +0.065, 94% HDI crosses zero, P(>0) = 73%), so the composition of returners is barely shifted by treatment; (ii) the base return rate is 2.3% in both arms, so even a sizeable proportional shift in *who* returns would move *who* enters Stage 2 by only fractions of a percentage point. The hurdle remains the right structure (zero spend on never-returners must be modelled separately from positive spend on returners), but the Stage-2 lift should be read as "conditional spend among customers who would have returned anyway, plus a small contribution from any treated-only marginal returners". A full bias correction would be a Heckman-style two-step or a joint hurdle with a shared latent in both arms; the simpler reading is that as long as Stage-1 is null the Stage-2 estimate is consistent.
+**Selection on Stage 2, and what to keep in mind when reading the spend lift.** The Stage-2 LogNormal arm is fit only on customers with `has_repeat = 1`, which is itself influenced by the treatment (Stage-1 estimates a policy effect on the Bernoulli return indicator). Conditioning on a post-treatment variable to define the analysis sample can in principle distort the Stage-2 estimate, because the treated and control returners differ in their unobserved propensity to return. Two reasons this concern is small in practice here: (i) the Stage-1 policy effect on returning is statistically null (δ̅_b = +0.065, 94% HDI crosses zero, P(>0) = 73%), so the composition of returners is barely shifted by treatment; (ii) the base return rate is 2.3% in both arms, so even a sizeable proportional shift in *who* returns would move *who* enters Stage 2 by only fractions of a percentage point. The hurdle remains the right structure (zero spend on never-returners must be modelled separately from positive spend on returners), but the Stage-2 lift should be read as "conditional spend among customers who would have returned anyway, plus a small contribution from any treated-only marginal returners". A full bias correction would be a Heckman-style two-step or a joint hurdle with a shared latent in both arms; the simpler reading is that as long as Stage-1 is null the Stage-2 estimate is consistent.
 
 **Stage-2 sparsity warning.** With only ~2,000 customers in the Stage-2 LogNormal arm spread across 73 categories, many categories have fewer than five positive observations. The partial-pooling prior shrinks these heavily toward the global mean, which is the right Bayesian behaviour, but it means the per-category δ_l_C[c] posterior for small categories is essentially the global posterior with extra noise rather than category-specific signal. Treat the per-category forest plot as a ranking instrument for well-observed categories, not as a confident point estimate everywhere.
 
 **Posterior predictive checks** for both stages of the hurdle confirm the model covers the observed data: PP draws of the Bernoulli stage produce repeat rates centred on the observed 2.3%, and PP draws of the LogNormal stage produce a conditional-spend distribution overlapping the empirical one. Wide PP intervals on the LogNormal stage reflect genuine uncertainty about long-tail spenders, not model mis-specification.
 
-![PPC - Stage 1 Bernoulli (repeat)](figures/ppc_revenue_did_stage1.png)
+![PPC for Stage 1 Bernoulli (repeat)](figures/ppc_revenue_did_stage1.png)
 
-![PPC - Stage 2 LogNormal (conditional spend)](figures/ppc_revenue_did_stage2.png)
+![PPC for Stage 2 LogNormal (conditional spend)](figures/ppc_revenue_did_stage2.png)
 
-### 4.3 Ordered logit - review score
+### 4.3 Ordered logit: review score
 
-Treating a 1-5 review score as continuous would imply the gap from 1→2 stars equals the gap from 4→5 - false in practically every Likert instrument. The standard cumulative-link model uses K-1 cutpoints:
+Treating a 1-5 review score as continuous would imply the gap from 1→2 stars equals the gap from 4→5, which is false in practically every Likert instrument. The standard cumulative-link model uses K-1 cutpoints:
 
 ```
 review_score_i ~ OrderedLogit(η = φ_i, cutpoints = κ)
@@ -279,12 +282,12 @@ The cutpoints κ are constrained-ordered via PyMC's `transforms.ordered`. The in
 **Result** (2 chains × 1000 draws on a stratified 30k-row subsample, 219s wall time):
 
 - Global treatment effect τ̅ (cumulative-logit scale): **mean = -0.158, 94% HDI = (-0.246, -0.066)**
-- P(τ̅ > 0) = **0.1%** - treatment lowers review scores with very high posterior probability
-- $\sigma_\tau = 0.130,\;\; \text{94\\% HDI } (0.007,\; 0.244)$ - modest but real cross-category variance
-- Cutpoints κ have low ESS (~41) - the standard mild non-identifiability between the cutpoints and the linear-predictor intercept in cumulative-logit models. The treatment effect itself has ESS_bulk = 1344, so the inference on τ is solid; the ESS warning is on parameters we don't quote in the headline.
+- P(τ̅ > 0) = **0.1%**, so treatment lowers review scores with very high posterior probability
+- $\sigma_\tau = 0.130,\;\; \text{94\\% HDI } (0.007,\; 0.244)$, modest but real cross-category variance
+- Cutpoints κ have low ESS (~41), the standard mild non-identifiability between the cutpoints and the linear-predictor intercept in cumulative-logit models. The treatment effect itself has ESS_bulk = 1344, so the inference on τ is solid; the ESS warning is on parameters we don't quote in the headline.
 
 **Cross-validation against classical baselines**:
-- Empirical means: control 4.176, treated 4.034 - a **-0.14 shift in mean review score** (matches the chi-square baseline in §5).
+- Empirical means: control 4.176, treated 4.034, a **-0.14 shift in mean review score** (matches the chi-square baseline in §5).
 - Chi-square test of independence (review × treatment): χ² = 201, p < 0.0001.
 - Mann-Whitney U on review score: p < 0.0001.
 - The Bayesian τ̅ = -0.158 (cumulative-logit) is fully consistent in direction and magnitude with the empirical mean shift.
@@ -297,19 +300,19 @@ time trend  (beta_post)     = +0.034  (94% HDI -0.01, +0.08)   null
 POLICY      (delta_bar)     = -0.170  (94% HDI -0.29, -0.06)   P(>0) = 0.3%
 ```
 
-**The review-score effect is real and robust to the DiD correction.** Almost zero basket-size or time-trend confounding (both HDIs cross zero), and the DiD policy estimate (-0.17 cum-logit) is essentially identical to the naive (-0.16). The 2x2 mean-shift confirms it: ((3.995 - 4.125) - (4.184 - 4.189)) = **-0.125 stars on the raw scale**. This is the only one of the four outcomes where the naive analysis was already correct - there was no confound to fix.
+**The review-score effect survives the DiD correction.** Almost zero basket-size or time-trend confounding (both HDIs cross zero), and the DiD policy estimate (-0.17 cum-logit) is essentially identical to the naive (-0.16). The 2x2 mean-shift confirms it: ((3.995 - 4.125) - (4.184 - 4.189)) = **-0.125 stars on the raw scale**. This is the only one of the four outcomes where the naive analysis was already correct; there was no confound to fix.
 
 ![Per-category policy effect on review score (DiD, cum-logit)](figures/review_did_delta_C_forest.png)
 
-The forest plot shows most category posteriors sitting to the left of zero, consistent with the global negative effect. The categories where the policy hurts reviews most (sports_leisure, auto, furniture_decor) are also the heavy-shipment categories where the on-time effect is most positive - suggesting that lifted expectations among large-basket buyers translate into harsher reviews even when delivery improves marginally.
+The forest plot shows most category posteriors sitting to the left of zero, consistent with the global negative effect. The categories where the policy hurts reviews most (sports_leisure, auto, furniture_decor) are also the heavy-shipment categories where the on-time effect is most positive, which suggests that raised expectations among large-basket buyers translate into harsher reviews even when delivery improves marginally.
 
-**Posterior predictive check.** The model reproduces the empirical 1-5 review-score distribution closely - the PP histogram overlaps the observed proportions per score (10% / 3% / 8% / 20% / 59% from 1-star to 5-star). Slight under-prediction in the 5-star tail is expected because the cumulative-logit treats the highest category as a residual; this does not affect the policy-effect estimates.
+**Posterior predictive check.** The model reproduces the empirical 1-5 review-score distribution closely. The PP histogram overlaps the observed proportions per score (10% / 3% / 8% / 20% / 59% from 1-star to 5-star). Slight under-prediction in the 5-star tail is expected because the cumulative-logit treats the highest category as a residual; this does not affect the policy-effect estimates.
 
-![PPC - Review DiD ordered logit](figures/ppc_review_did.png)
+![PPC for the review DiD ordered logit](figures/ppc_review_did.png)
 
-**Diagnostic note on cutpoint mixing - and the anchoring fix.** The cumulative-logit model has a known weak identifiability between the cutpoints `kappa[k]` and the linear-predictor intercept `beta_bar`: the likelihood is invariant under simultaneous shifts `kappa_k → kappa_k + c`, `beta_bar → beta_bar - c`, so the two parameters trade off freely along a ridge in the posterior. Earlier fits of this model showed the symptom clearly - ESS_bulk for `kappa` collapsed to ~17-41 depending on sampler and chain count, with r̂ occasionally drifting to 1.18.
+**Diagnostic note on cutpoint mixing and the anchoring fix.** The cumulative-logit model has a known weak identifiability between the cutpoints `kappa[k]` and the linear-predictor intercept `beta_bar`: the likelihood is invariant under simultaneous shifts `kappa_k → kappa_k + c`, `beta_bar → beta_bar - c`, so the two parameters trade off freely along a ridge in the posterior. Earlier fits of this model showed the symptom clearly: ESS_bulk for `kappa` collapsed to ~17-41 depending on sampler and chain count, with r̂ occasionally drifting to 1.18.
 
-The structural fix is now applied in `src/models/review.py` and `src/models/review_did.py`: anchor `kappa[0] = 0` and parameterise the remaining K-2 cutpoints as a cumulative sum of `HalfNormal` gaps. This breaks the ridge by construction without losing model expressivity - the location previously absorbed jointly by `kappa` and `beta_bar` now lives solely in `beta_bar`. After the fix (4 chains × 1000 draws on `nutpie`):
+The structural fix is now applied in `src/models/review.py` and `src/models/review_did.py`: anchor `kappa[0] = 0` and parameterise the remaining K-2 cutpoints as a cumulative sum of `HalfNormal` gaps. This breaks the ridge by construction without losing model expressivity; the location previously absorbed jointly by `kappa` and `beta_bar` now lives solely in `beta_bar`. After the fix (4 chains × 1000 draws on `nutpie`):
 
 ```
 kappa[0]       anchored at 0     (constant by construction)
@@ -320,7 +323,7 @@ delta_bar      ESS  948   r̂ 1.01   mean = -0.171, 94% HDI (-0.287, -0.041)
 beta_bar       ESS  108   r̂ 1.04
 ```
 
-Cutpoint ESS jumped 50-100x. `delta_bar` is essentially unchanged from the pre-fix run (-0.171 vs -0.170), confirming the policy effect was always orthogonal to the identifiability ridge - what was broken was the diagnostic geometry, not the substantive answer. `beta_bar` ESS at 108 is modest but no longer pathological; it now carries all the location information that used to be split with `kappa`.
+Cutpoint ESS jumped 50-100x. `delta_bar` is essentially unchanged from the pre-fix run (-0.171 vs -0.170), which confirms the policy effect was always orthogonal to the identifiability ridge. What was broken was the diagnostic geometry, and the substantive answer never moved. `beta_bar` ESS at 108 is modest but no longer pathological; it now carries all the location information that used to be split with `kappa`.
 
 ---
 
@@ -330,18 +333,18 @@ Run by `scripts/run_baselines.py`, output written to `reports/baselines.md`. Hea
 
 | Test | Outcome | Result |
 |---|---|---|
-| Two-proportion z | on-time delivery | -2.36 pp (95% CI -2.97 to -1.74), p<0.0001 - direction agrees with Bayesian |
-| Welch t-test | repeat revenue (180-day) | +R$ 1.90 (95% CI +0.44 to +3.37), p=0.011 - treated customers spend slightly more |
-| Mann-Whitney U | repeat revenue | p=0.0002 - rank-shift in the tail, both medians are R$ 0 |
-| Chi-square | review score distribution | χ² = 201, p<0.0001 - distributions differ; mean shifts from 4.175 (control) to 4.034 (treated) |
+| Two-proportion z | on-time delivery | -2.36 pp (95% CI -2.97 to -1.74), p<0.0001; direction agrees with the Bayesian fit |
+| Welch t-test | repeat revenue (180-day) | +R$ 1.90 (95% CI +0.44 to +3.37), p=0.011; treated customers spend slightly more |
+| Mann-Whitney U | repeat revenue | p=0.0002; rank shift in the tail, both medians are R$ 0 |
+| Chi-square | review score distribution | χ² = 201, p<0.0001; distributions differ, mean shifts from 4.175 (control) to 4.034 (treated) |
 
-These are not strawmen - they are the methods a marketplace data scientist would use *by default*. What the hierarchical Bayesian framework adds:
+These are the methods a marketplace data scientist would use *by default*. What the hierarchical Bayesian framework adds on top of them:
 
-- **Per-category posterior** for each outcome, not a single pooled effect.
-- **Across-category variance** σ_τ, σ_δ - quantifying *how heterogeneous* the effect is.
-- **Honest uncertainty** - credible intervals over latent quantities (e.g., the LogNormal repeat-spend multiplier) not just p-values on differences of means.
+- A per-category posterior for each outcome instead of a single pooled effect.
+- The across-category variance σ_τ, σ_δ, which quantifies *how heterogeneous* the effect is.
+- Credible intervals over latent quantities such as the LogNormal repeat-spend multiplier, which p-values on differences of means cannot give.
 
-The story being told end-to-end: **the policy correlates with bigger, slower, less-on-time orders, which annoys customers slightly (review score drops 0.14) but makes them spend more on average per order (+R$ 1.90).** A flat A/B analysis stops there. The hierarchical model exposes which product categories drive each piece - that's the Simpson-paradox-style heterogeneity invisible to pooled tests.
+End to end, the story is that the policy correlates with bigger, slower, less-on-time orders, which annoys customers slightly (review score drops 0.14) but makes them spend more on average per order (+R$ 1.90). A flat A/B analysis stops there. The hierarchical model exposes which product categories drive each piece, which is the Simpson-paradox-style heterogeneity pooled tests cannot see.
 
 ---
 
@@ -360,10 +363,10 @@ Beyond the visual logit-decomposition argument in §4.1, we run PSIS-LOO leave-o
 
 What we can confirm from the LOO output:
 
-1. **Both posteriors are well-behaved** - every Pareto-k diagnostic value is below 0.7, the standard threshold for reliable PSIS-LOO. Neither model is mis-specified at a level that would invalidate the LOO approximation.
-2. **The effective parameter counts (p_loo)** track the actual model complexity: 114.9 for naive (varying intercepts + varying treatment slopes × 73 categories + month effects), 91.9 for DiD (fewer because the month grouping is absorbed into the `post` main effect). Neither model is dramatically over-parameterised relative to its sample size.
+1. Both posteriors are well behaved: every Pareto-k diagnostic value is below 0.7, the standard threshold for reliable PSIS-LOO. Neither model is mis-specified at a level that would invalidate the LOO approximation.
+2. The effective parameter counts (p_loo) track the actual model complexity: 114.9 for naive (varying intercepts + varying treatment slopes × 73 categories + month effects), 91.9 for DiD (fewer because the month grouping is absorbed into the `post` main effect). Neither model is dramatically over-parameterised relative to its sample size.
 
-**The substantive choice between the two models is causal-identification, not predictive accuracy.** The DiD model cleanly separates the policy effect from basket-size and time-trend confounds (as documented in §4.1); the naive model conflates them. Even if the naive model had higher per-cell elpd, the DiD would still be the right specification for policy inference. A proper apples-to-apples LOO comparison would require re-fitting both at one shared aggregation (queued as future work).
+**The substantive choice between the two models rests on causal identification rather than predictive accuracy.** The DiD model cleanly separates the policy effect from basket-size and time-trend confounds (as documented in §4.1); the naive model conflates them. Even if the naive model had higher per-cell elpd, the DiD would still be the right specification for policy inference. A proper apples-to-apples LOO comparison would require re-fitting both at one shared aggregation (queued as future work).
 
 ### 6.1 Prior sensitivity
 
@@ -375,13 +378,13 @@ The hyperpriors used in §4 are deliberately weak: `Normal(0, 1.5)` on global me
 | `Exponential(2)` (tighter) | +0.1695 | (+0.062, +0.295) | 0.198 | 99.6% |
 | `HalfNormal(1)` (different family) | +0.1696 | (+0.052, +0.288) | 0.196 | 99.8% |
 
-`δ̅` shifts by 0.0004 logit across the three configurations - essentially zero on the probability scale - and `σ_δ` is similarly stable at ~0.20. The posterior is dominated by the 97k-order likelihood, not the prior. Full output in [`reports/prior_sensitivity.md`](prior_sensitivity.md).
+`δ̅` shifts by 0.0004 logit across the three configurations (essentially zero on the probability scale) and `σ_δ` is similarly stable at ~0.20. The posterior is dominated by the 97k-order likelihood, not the prior. Full output in [`reports/prior_sensitivity.md`](prior_sensitivity.md).
 
 ### 6.2 Multiple-testing posture
 
-The pipeline runs three Bayesian DiD models (on-time, hurdle revenue, ordered-logit review) and four classical baselines on the same data. A frequentist would, in a confirmatory setting, ask for a Bonferroni- or Benjamini-Hochberg-style correction on the seven p-values. The Bayesian DiD posteriors quoted as P(δ̅ > 0) are not p-values and do not enter a family-wise error rate calculation: posterior probabilities are conditional on the model and the data, not the result of a hypothesis-test family. The hierarchical structure provides additional protection - the per-category δ_C[c] estimates are partial-pooled toward the global mean, which is the Bayesian analogue of a shrinkage correction for many comparisons.
+The pipeline runs three Bayesian DiD models (on-time, hurdle revenue, ordered-logit review) and four classical baselines on the same data. A frequentist would, in a confirmatory setting, ask for a Bonferroni- or Benjamini-Hochberg-style correction on the seven p-values. The Bayesian DiD posteriors quoted as P(δ̅ > 0) are not p-values and do not enter a family-wise error rate calculation: posterior probabilities are conditional on the model and the data, not the result of a hypothesis-test family. The hierarchical structure provides additional protection, since the per-category δ_C[c] estimates are partial-pooled toward the global mean, which is the Bayesian analogue of a shrinkage correction for many comparisons.
 
-What is still worth saying out loud: the report quotes 73 per-category posterior means in §8. The headline summary tables are robust because the partial-pooling prior shrinks small-sample categories hard, but a reader picking individual categories from the forest plots should weight HDI width over posterior mean. The classical baselines in §5 are quoted as a sanity-check triangulation, not as independent significance tests; a strict frequentist reading of §5 would apply Bonferroni at α/4, in which case the on-time and review-score tests still clear the threshold at p << 0.0001 / 4. Conditional revenue (Welch p = 0.011) does not survive a Bonferroni-at-4 correction, which is consistent with the Bayesian DiD finding of a non-zero but uncertain Stage-2 lift.
+One thing to state plainly: the report quotes 73 per-category posterior means in §8. The headline summary tables hold up because the partial-pooling prior shrinks small-sample categories hard, but a reader picking individual categories from the forest plots should weight HDI width over posterior mean. The classical baselines in §5 are quoted as a sanity-check triangulation, not as independent significance tests; a strict frequentist reading of §5 would apply Bonferroni at α/4, in which case the on-time and review-score tests still clear the threshold at p << 0.0001 / 4. Conditional revenue (Welch p = 0.011) does not survive a Bonferroni-at-4 correction, which is consistent with the Bayesian DiD finding of a non-zero but uncertain Stage-2 lift.
 
 ---
 
@@ -389,7 +392,7 @@ What is still worth saying out loud: the report quotes 73 per-category posterior
 
 The Bayesian posteriors above give the policy's effect on three KPIs in their natural units. To translate those into commercial terms the script `scripts/cost_benefit_envelope.py` combines the posterior means from the DiD revenue model with a SQL query for average freight cost per eligible order, producing a sized R$ envelope. Output is written to [`reports/cost_benefit_envelope.md`](cost_benefit_envelope.md).
 
-**Inputs from the actual Olist data** (the subsidy applies *only* to orders that are both eligible AND post-cutover - earlier drafts incorrectly used the pre+post eligible total, inflating the subsidy cost ~2×):
+**Inputs from the actual Olist data** (the subsidy applies *only* to orders that are both eligible AND post-cutover; earlier drafts incorrectly used the pre+post eligible total, inflating the subsidy cost ~2×):
 
 | Quantity | Value |
 |---|---|
@@ -411,15 +414,15 @@ The Bayesian posteriors above give the policy's effect on three KPIs in their na
 | Incremental margin @ 20% | 4,384 |
 | **Net envelope (margin − subsidy)** | **−452,495** |
 
-**The policy loses ~R$ 452K under reasonable assumptions.** Break-even contribution margin would need to be `subsidy / incremental_GMV ≈ 2084%` (impossible), or equivalently the DiD spend multiplier would need to be roughly two orders of magnitude larger than the posterior estimates. **At this design point - R$ 150 threshold, 180-day window, observed lift magnitudes - the policy is not commercially viable.**
+**The policy loses ~R$ 452K under reasonable assumptions.** Break-even contribution margin would need to be `subsidy / incremental_GMV ≈ 2084%` (impossible), or equivalently the DiD spend multiplier would need to be roughly two orders of magnitude larger than the posterior estimates. **At this design point (R$ 150 threshold, 180-day window, observed lift magnitudes) the policy is not commercially viable.**
 
-It is worth noticing that the per-customer lift (+R$ 1.90) and the conditional-spend lift (+10%) are both positive, yet the marketplace-wide envelope is sharply negative - because the subsidy is paid on *all* eligible post-cutover orders, not only on the marginal incremental ones. A real platform would respond by either (a) lowering the threshold to expand the eligible pool of customers most likely to convert (which itself would change basket dynamics - see Limitations §9), (b) targeting only the per-category subset where the policy is most favourable (see §8 recommendations), or (c) bundling the policy with a non-freight cost reduction.
+The per-customer lift (+R$ 1.90) and the conditional-spend lift (+10%) are both positive, yet the marketplace-wide envelope is sharply negative, because the subsidy is paid on *all* eligible post-cutover orders rather than only on the marginal incremental ones. A real platform would respond by either (a) lowering the threshold to expand the eligible pool of customers most likely to convert (which itself would change basket dynamics; see Limitations §9), (b) targeting only the per-category subset where the policy is most favourable (see §8 recommendations), or (c) bundling the policy with a non-freight cost reduction.
 
-**What this envelope omits**: lifetime-value impact beyond 180 days, review-score-driven brand effects, seller-side price responses, and threshold-bunching dynamics - all in §9 Limitations.
+**What this envelope omits**: lifetime-value impact beyond 180 days, review-score-driven brand effects, seller-side price responses, and threshold-bunching dynamics, all in §9 Limitations.
 
 ---
 
-## 8. Where to actually run the policy - per-category recommendations
+## 8. Where to run the policy: per-category recommendations
 
 The hierarchical structure of the three DiD-corrected models gives a posterior distribution on the policy effect *per product category*. That lets us answer the operationally-meaningful question: **if the platform were to run this as a phased rollout rather than a marketplace-wide switch, which categories should go first?**
 
@@ -445,14 +448,14 @@ Full per-category rankings are in [`reports/category_recommendations.md`](catego
 | baby | -0.241 | 1.8% |
 | bed_bath_table | -0.238 | 0.9% |
 
-**The interesting tension**: `auto` and `furniture_decor` appear on *both* lists. The policy speeds up their delivery (the on-time DiD posterior is sharply positive in both categories), yet reviews drop in those same categories. The likely mechanism is that customers buying large, expensive items hold higher expectations than a +3 pp on-time lift can satisfy. This is the operational trade-off the platform team has to weigh.
+There is a tension here. `auto` and `furniture_decor` appear on *both* lists. The policy speeds up their delivery (the on-time DiD posterior is sharply positive in both categories), yet reviews drop in those same categories. The likely mechanism is that customers buying large, expensive items hold higher expectations than a +3 pp on-time lift can satisfy. This is the operational trade-off the platform team has to weigh.
 
 **A note on cross-outcome aggregation.** Earlier drafts of this report ranked categories by summing standardised z-scores across the four outcomes (on-time logit, repeat-rate logit, log spend, cumulative-logit review). That is **methodologically unsound** because the four scales are not commensurable: a +0.1 shift in cumulative-logit review and a +0.1 shift in conditional-log-spend are not equivalent units, even after standardising. Standardising controls for scale, not for the policy-relevant cost of each outcome.
 
 The defensible alternatives are:
 
-- **Decision-theoretic utility** - assign weights $w_1, w_2, w_3, w_4$ (e.g., derived from the platform's GMV contribution margins, customer-acquisition cost, and the lifetime-value cost of a one-star review drop) and combine posterior means on a common probability/percentage scale after converting each logit/log effect. This requires domain inputs the public Olist data cannot supply.
-- **Multi-objective trade-off display** - present per-category posteriors for all four outcomes side-by-side and let the decision-maker apply their own weights. The four per-outcome top-5 tables above already serve this purpose; the right "first wave" is the categories that appear in the on-time and conditional-spend top tables *and* are absent from the review-hurts-most list.
+- A decision-theoretic utility. Assign weights $w_1, w_2, w_3, w_4$ (e.g. derived from the platform's GMV contribution margins, customer-acquisition cost, and the lifetime-value cost of a one-star review drop) and combine posterior means on a common probability or percentage scale after converting each logit/log effect. This requires domain inputs the public Olist data cannot supply.
+- A multi-objective trade-off display. Present per-category posteriors for all four outcomes side by side and let the decision-maker apply their own weights. The four per-outcome top-5 tables above already do this; the right "first wave" is the categories that appear in the on-time and conditional-spend top tables *and* are absent from the review-hurts-most list.
 
 Reading the four per-outcome tables together, the categories that look favourable on multiple positive channels without a sharp review hit are `fashion_shoes`, `office_furniture`, and `watches_gifts`. Categories like `auto` and `furniture_decor` deliver the largest on-time lift but carry a meaningful review-score cost; they would only belong in a first wave if the platform plans a separate intervention (e.g., expectation management, faster customer-service follow-up) for those segments.
 
@@ -464,23 +467,23 @@ The full per-category posterior summary lives in [`reports/category_recommendati
 
 This is an observational analysis of a synthetic intervention on a public marketplace dataset. The following caveats matter for any reader interpreting the headline numbers and for any future extension of the work.
 
-1. **Synthetic treatment, not RCT.** The free-shipping policy was never actually run on Olist. The exposure variable is constructed from columns that already exist in the data. Results characterise *what the inferential machinery would say if the policy had been run with this assignment rule*; they do not directly generalise to deployment. Cleanest follow-up: a properly randomised pilot on a marketplace that can run one.
+1. Synthetic treatment rather than an RCT. The free-shipping policy was never actually run on Olist. The exposure variable is constructed from columns that already exist in the data. Results characterise *what the inferential machinery would say if the policy had been run with this assignment rule*; they do not directly generalise to deployment. Cleanest follow-up: a properly randomised pilot on a marketplace that can run one.
 
-2. **Threshold bunching not modellable - tested.** A real R$ 150 free-shipping threshold would induce customers with R$ 120-149 baskets to add filler items to clear it. The Olist historical data cannot capture this behavioural response because the threshold did not exist when the data was generated. `scripts/bunching_test.py` runs a McCrary-style density continuity test at R$ 150 and finds **the opposite of policy bunching**: a deficit of orders just above R$ 150 (Z = -13.9), not an excess. This is retail-pricing structure (psychological "just-under" pricing at R$ 149) rather than policy-induced bunching, and it confirms the synthetic-treatment data is *not* contaminated by an unmodelled selection mechanism. Full diagnostic in [`reports/bunching_diagnostic.md`](bunching_diagnostic.md). The structural kink is also why an RDD identification at the same cutoff would be problematic (RDD assumes density continuity through the threshold); DiD is preferable for this dataset and threshold choice. In a real deployment the bunching dynamic would still appear and would inflate the conditional-spend lift; the DiD posterior from this static analysis is therefore an *underestimate* of what a real deployment would observe.
+2. Threshold bunching cannot be modelled from this data, and the test confirms it. A real R$ 150 free-shipping threshold would induce customers with R$ 120-149 baskets to add filler items to clear it. The Olist historical data cannot capture this behavioural response because the threshold did not exist when the data was generated. `scripts/bunching_test.py` runs a McCrary-style density continuity test at R$ 150 and finds **the opposite of policy bunching**: a deficit of orders just above R$ 150 (Z = -13.9), not an excess. This is retail-pricing structure (psychological "just-under" pricing at R$ 149) rather than policy-induced bunching, and it confirms the synthetic-treatment data is *not* contaminated by an unmodelled selection mechanism. Full diagnostic in [`reports/bunching_diagnostic.md`](bunching_diagnostic.md). The structural kink is also why an RDD identification at the same cutoff would be problematic (RDD assumes density continuity through the threshold); DiD is preferable for this dataset and threshold choice. In a real deployment the bunching dynamic would still appear and would inflate the conditional-spend lift; the DiD posterior from this static analysis is therefore an *underestimate* of what a real deployment would observe.
 
-3. **Seller-side distortion (SUTVA).** The analysis assumes the stable-unit treatment value assumption - that the policy effect on one order is independent of how the policy affects other orders. In a marketplace this fails: sellers learn the policy and can adjust list prices (to recover the shipping margin) or logistics priority (to favour eligible orders, crowding out ineligible ones). Both would bias the estimated effect upward in opposite directions. A properly clustered RCT randomising at the seller level rather than the order level would handle this; an observational study cannot.
+3. Seller-side distortion (SUTVA). The analysis assumes the stable-unit treatment value assumption, that the policy effect on one order is independent of how the policy affects other orders. In a marketplace this fails: sellers learn the policy and can adjust list prices (to recover the shipping margin) or logistics priority (to favour eligible orders, crowding out ineligible ones). Both would bias the estimated effect upward in opposite directions. A properly clustered RCT randomising at the seller level rather than the order level would handle this; an observational study cannot.
 
-4. **Parallel trends - now formally tested.** `scripts/parallel_trends.py` fits `logit(on_time_rate) = a + b·time + c·eligible + d·(time × eligible)` on the pre-cutover window only (46,774 orders across 58 weeks). The headline coefficient `d` is the slope difference between the two cohorts in the pre-period; under the parallel-trends assumption it should be statistically indistinguishable from zero. **Result: `d` = -0.003 logit/week, p = 0.33** - not statistically distinguishable from zero. The parallel-trends assumption is consistent with the data, and the +1.5 pp policy effect in §4.1 is not a pre-trend artefact. Full visualisation and regression table in [`reports/parallel_trends.md`](parallel_trends.md).
+4. Parallel trends, now formally tested. `scripts/parallel_trends.py` fits `logit(on_time_rate) = a + b·time + c·eligible + d·(time × eligible)` on the pre-cutover window only (46,774 orders across 58 weeks). The headline coefficient `d` is the slope difference between the two cohorts in the pre-period; under the parallel-trends assumption it should be statistically indistinguishable from zero. **Result: `d` = -0.003 logit/week, p = 0.33**, not statistically distinguishable from zero. The parallel-trends assumption is consistent with the data, and the +1.5 pp policy effect in §4.1 is not a pre-trend artefact. Full visualisation and regression table in [`reports/parallel_trends.md`](parallel_trends.md).
 
-5. **180-day repeat window induces right-censoring.** Customers placing first orders late in the panel had less than 180 days of observed follow-up to actually repeat-purchase. The DiD model absorbs the average censoring effect via `β_post`, but a properly survival-analytic treatment (a Weibull accelerated failure-time or Cox proportional-hazards model with PyMC's censored-distribution wrapper for never-returners) is the textbook fix and would report a hazard ratio rather than a P(repeat) directly.
+5. The 180-day repeat window induces right-censoring. Customers placing first orders late in the panel had less than 180 days of observed follow-up to actually repeat-purchase. The DiD model absorbs the average censoring effect via `β_post`, but a properly survival-analytic treatment (a Weibull accelerated failure-time or Cox proportional-hazards model with PyMC's censored-distribution wrapper for never-returners) is the textbook fix and would report a hazard ratio rather than a P(repeat) directly.
 
-6. **Ordered-logit cutpoint non-identifiability - resolved.** The cumulative-logit `kappa_k` cutpoints share an additive ridge with the linear-predictor intercept `beta_bar`. Earlier fits showed the symptom (cutpoint ESS ~17-41, r̂ up to 1.18). The structural fix is now applied: `kappa[0]` is anchored at 0 and the remaining cutpoints are parameterised as a cumulative sum of positive `HalfNormal` gaps. After the fix, cutpoint ESS jumped to ~941-2195 with r̂ = 1.00-1.01, and the headline `delta_bar` is essentially unchanged from the pre-fix run (it was always orthogonal to the ridge). See §4.3 for the full post-anchor diagnostics.
+6. Ordered-logit cutpoint non-identifiability, now resolved. The cumulative-logit `kappa_k` cutpoints share an additive ridge with the linear-predictor intercept `beta_bar`. Earlier fits showed the symptom (cutpoint ESS ~17-41, r̂ up to 1.18). The structural fix is now applied: `kappa[0]` is anchored at 0 and the remaining cutpoints are parameterised as a cumulative sum of positive `HalfNormal` gaps. After the fix, cutpoint ESS jumped to ~941-2195 with r̂ = 1.00-1.01, and the headline `delta_bar` is essentially unchanged from the pre-fix run (it was always orthogonal to the ridge). See §4.3 for the full post-anchor diagnostics.
 
-7. **RDD as an alternative identification strategy.** At a fixed monetary threshold like R$ 150, regression discontinuity (with bandwidth chosen by IK/CCT selectors) is a textbook identification design that requires only that customers cannot precisely manipulate their subtotal near the cutoff. It would deliver a Local Average Treatment Effect at the threshold rather than an ATE, but is worth adding as a robustness check alongside the DiD ATE.
+7. RDD as an alternative identification strategy. At a fixed monetary threshold like R$ 150, regression discontinuity (with bandwidth chosen by IK/CCT selectors) is a textbook identification design that requires only that customers cannot precisely manipulate their subtotal near the cutoff. It would deliver a Local Average Treatment Effect at the threshold rather than an ATE, but is worth adding as a sensitivity check alongside the DiD ATE.
 
-8. **No formal model comparison (LOO/WAIC) - now addressed.** Earlier drafts of this report compared naive vs DiD only via the visual logit-decomposition argument in §4.1. The PSIS-LOO comparison is now implemented in `scripts/model_comparison.py` (§6 above), which computes `elpd_loo`, `p_loo`, and pairwise stacking weights for naive vs DiD on the on-time outcome. The DiD model's substantive advantage is causal identification rather than out-of-sample fit - both specifications can predict held-out cells well while telling different causal stories.
+8. No formal model comparison (LOO/WAIC), now addressed. Earlier drafts of this report compared naive vs DiD only via the visual logit-decomposition argument in §4.1. The PSIS-LOO comparison is now implemented in `scripts/model_comparison.py` (§6 above), which computes `elpd_loo`, `p_loo`, and pairwise stacking weights for naive vs DiD on the on-time outcome. The DiD model's substantive advantage is causal identification rather than out-of-sample fit; both specifications can predict held-out cells well while telling different causal stories.
 
-9. **CI + unit tests - now addressed.** A 17-test pytest suite lives in `tests/` covering: treatment-assignment correctness (5 unit tests with synthetic data, run in CI), PyMC model factories (6 unit tests including the κ[0]-anchoring invariant), and DuckDB integration (6 tests that auto-skip when the warehouse is not built). A GitHub Actions workflow at `.github/workflows/ci.yml` runs the unit tests + smoke test on every push to `main`. The integration tests run locally after `python -m src.etl`.
+9. CI and unit tests, now addressed. A 17-test pytest suite lives in `tests/` covering: treatment-assignment correctness (5 unit tests with synthetic data, run in CI), PyMC model factories (6 unit tests including the κ[0]-anchoring invariant), and DuckDB integration (6 tests that auto-skip when the warehouse is not built). A GitHub Actions workflow at `.github/workflows/ci.yml` runs the unit tests + smoke test on every push to `main`. The integration tests run locally after `python -m src.etl`.
 
 ---
 

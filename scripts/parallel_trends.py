@@ -5,12 +5,12 @@ under the assumption that the pre-cutover on-time delivery trends are
 parallel between the eligible (subtotal >= R$ 150) and ineligible cohorts.
 This script makes that assumption testable, two ways:
 
-1.  **Visual check** - plot weekly on-time rates for both cohorts across
+1.  Visual check: plot weekly on-time rates for both cohorts across
     the full panel, with a vertical line at the cutover week. If the two
     lines move roughly in parallel before the cutover, the assumption
     holds visually.
 
-2.  **Formal pre-trend regression** - restrict to the pre-cutover window
+2.  Formal pre-trend regression: restrict to the pre-cutover window
     and fit:
 
         logit(on_time) = a + b*time + c*eligible + d*(time x eligible)
@@ -198,7 +198,7 @@ def main() -> None:
     lines.append(
         "Both cohorts move broadly in parallel across the panel. The "
         "vertical dashed line marks the cutover week. Both cohorts also "
-        "drop together at the right edge - that's the delivery-grace "
+        "drop together at the right edge, which is the delivery-grace "
         "censoring (orders too recent to have a delivery outcome) and is "
         "filtered out of the modelling panel via the 6-week grace window "
         "in `src/features.py`."
@@ -225,14 +225,14 @@ def main() -> None:
                  f"| eligible vs ineligible level |")
     lines.append(f"| **`time x eligible`** | **{res['time_x_elig']['coef']:+.4f}** "
                  f"| {res['time_x_elig']['se']:.4f} | **{res['time_x_elig']['p']:.4f}** "
-                 f"| **slope difference - parallel-trends test** |")
+                 f"| **slope difference, the parallel-trends test** |")
     lines.append("")
     lines.append(f"Pre-period sample size: {res['n_orders_pre']:,} orders "
                  f"across {res['n_weeks']} weeks.")
     lines.append("")
     if passes:
         lines.append(
-            f"**Result: PARALLEL TRENDS CONSISTENT WITH DATA.** The slope "
+            f"**Result: parallel trends are consistent with the data.** The slope "
             f"difference `time x eligible` is {res['time_x_elig']['coef']:+.4f} "
             f"logit-points per week with p = {p:.3f}, which is not "
             f"statistically distinguishable from zero at the 5% level. The "
@@ -242,13 +242,13 @@ def main() -> None:
         )
     else:
         lines.append(
-            f"**Result: PARALLEL-TRENDS ASSUMPTION VIOLATED.** The slope "
+            f"**Result: the parallel-trends assumption is violated.** The slope "
             f"difference `time x eligible` is {res['time_x_elig']['coef']:+.4f} "
             f"logit-points per week with p = {p:.4f}, which IS "
             f"statistically distinguishable from zero. The naive DiD "
             f"identification is contaminated by differential pre-trends. "
             f"The reported +1.5 pp policy effect should be interpreted "
-            f"with caution - some of it may be the continuation of an "
+            f"with caution, since some of it may be the continuation of an "
             f"already-diverging pre-trend rather than a true policy "
             f"effect. A more flexible specification (e.g., adding "
             f"category-week fixed effects, or restricting the panel to "

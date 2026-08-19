@@ -9,7 +9,7 @@ Per cell i indexed by (category c, seller_tier s, state g, month m, treatment T)
     logit(p_i) = alpha_C[c] + beta_S[s] + gamma_G[g] + delta_M[m]
                  + tau_C[c] * T_i
 
-Adaptive (hierarchical) priors - partial pooling:
+Adaptive (hierarchical) priors, partial pooling:
 
     alpha_C[c] ~ Normal(alpha_bar, sigma_alpha)
     beta_S[s]  ~ Normal(0,         sigma_beta)
@@ -27,9 +27,9 @@ Notes
 * Non-centered parameterisation (z * sigma + mu) is used throughout to avoid
   the divergences that the centered form would produce here.
 * `tau_C[c] ~ Normal(tau_bar, sigma_tau)` lets the treatment effect itself
-  vary by product category - the headline result of the analysis. A flat A/B
-  test gives one number; this gives a posterior over (n_categories) effects
-  plus a global mean and across-category variance.
+  vary by product category, which is the headline result of the analysis. A
+  flat A/B test gives one number; this gives a posterior over (n_categories)
+  effects plus a global mean and across-category variance.
 """
 
 from __future__ import annotations
@@ -49,8 +49,8 @@ import pymc as pm
 @dataclass(frozen=True)
 class BinomialModelData:
     """Tensor-shaped inputs to PyMC."""
-    n_trials: np.ndarray          # shape (N,) - denominator
-    n_successes: np.ndarray       # shape (N,) - numerator (success-coded outcome)
+    n_trials: np.ndarray          # shape (N,): denominator
+    n_successes: np.ndarray       # shape (N,): numerator (success-coded outcome)
     treatment: np.ndarray         # shape (N,) {0, 1}
     category_idx: np.ndarray      # shape (N,)
     seller_tier_idx: np.ndarray   # shape (N,)

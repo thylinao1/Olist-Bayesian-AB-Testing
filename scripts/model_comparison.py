@@ -3,7 +3,7 @@
 For each fitted model, computes the leave-one-out expected log predictive
 density (elpd_loo) and the effective number of parameters (p_loo). Then
 runs a pairwise comparison between the naive binomial and the DiD binomial
-to quantify how much the DiD reparameterisation improves out-of-sample
+to quantify how much the DiD reparameterisation changes out-of-sample
 predictive accuracy.
 
 Output: reports/model_comparison.md  (and stdout).
@@ -129,7 +129,7 @@ def main() -> None:
     lines.append("")
     lines.append("The defensible cross-comparison is **per-cell elpd**: "
                  f"naive = {naive_per_cell:.4f}, DiD = {did_per_cell:.4f}. "
-                 "But this still isn't strictly apples-to-apples because per-cell "
+                 "But it still is not strictly apples-to-apples, because per-cell "
                  "log-likelihood depends on cell size (a Binomial(n, p) has higher "
                  "per-cell entropy when n is larger, so coarser cells get larger |elpd| "
                  "per cell). The honest interpretation is that **both models predict their "
@@ -137,9 +137,9 @@ def main() -> None:
                  "the choice between them rests on causal-identification grounds "
                  "rather than on LOO numbers.")
     lines.append("")
-    lines.append("## Substantive takeaway")
+    lines.append("## Choosing between the two models")
     lines.append("")
-    lines.append("The DiD model's advantage is *causal identification* - it cleanly "
+    lines.append("The DiD model's advantage is *causal identification*; it cleanly "
                  "separates the policy effect from basket-size structural effects and "
                  "the marketplace-wide time trend (as documented in §4.1 and §6 of the "
                  "main report). Out-of-sample predictive accuracy is a separate question, "

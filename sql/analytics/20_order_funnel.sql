@@ -8,7 +8,7 @@
 -- treat it like a conversion funnel: of all orders placed in week W, what
 -- fraction made it to each stage?
 --
--- Why this matters for the project:
+-- What the funnel feeds:
 --   * The hierarchical Binomial model needs a clean conversion definition;
 --     this file produces it at weekly cohort grain.
 --   * The funnel diagnostics also feed quality_diagnostics: any stage with
